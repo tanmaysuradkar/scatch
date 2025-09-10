@@ -1,20 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const isloggedin = require("../middlewares/isLoggedIn");
-const {
-  registerUser,
-  loginUser,
-  logout,
-} = require("../controllers/users.controller");
-
+const { createReview , deleteReview} = require("../controllers/reviews.controller");
 router.get("/", function (req, res) {
+  console.log("wehjfniwjnasnj");
   res.send("hey it's working");
 });
 
-router.post("/register", registerUser);
+router.post("/createReview", createReview);
 
-router.post("/login", loginUser);
-
-router.get("/logout", logout);
+router.post("/deleteReview", deleteReview);
 
 module.exports = router;

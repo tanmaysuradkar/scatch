@@ -57,25 +57,25 @@ module.exports.deleteProduct = async function (req, res) {
       message: "Delete Product Successfully",
       product: {
         _id: product._id,
-        image: image,
-        name: name,
-        Categories: Categories,
-        price: price,
-        discount: discount,
+        image: product.image,
+        name: product.name,
+        Categories: product.Categories,
+        price: product.price,
+        discount: product.discount,
       },
     });
   }
 };
 
 module.exports.updateProduct = async function (req, res) {
-  let { image, name, Categories, price, discount } = req.body;
+  let {  name ,image, rename, Categories, price, discount } = req.body;
 
   let productIs = await productsModels.findOne({ name });
   if (!productIs) {
     // req.flash("error", "Email or Password incorrect");
     // return res.redirect("/");
     res.status(401).json({
-      message: "update Product Not Working",
+      message: "update Product, Not Working",
       product: {
         heloo: "aktjnwjliseaz;krmf;n",
       },

@@ -33,5 +33,5 @@ app.use("/", indexRouter);
 app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
-app.use("/reviews", productsRouter);
+app.use("/reviews", reviewsRouter);
 app.listen(4000);
