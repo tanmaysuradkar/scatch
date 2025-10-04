@@ -8,16 +8,12 @@ const ownerSchema = mongoose.Schema({
   },
   email: String,
   password: String,
-  products: {
-    type: Array,
-    default: [],
-  },
   picture: String,
   gstin: String,
 });
 
 ownerSchema.methods.generateAuthToken = async function() {
-    const token = jwt.sign({_id: this._id}, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({_id: this._id}, process.env.JWT_KEY, { expiresIn: '24h' });
     return token;
 }
 ownerSchema.methods.comparePassword = async function(Password) {

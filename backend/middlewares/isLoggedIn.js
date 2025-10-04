@@ -1,21 +1,47 @@
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user-model");
+const owerModel = require("../models/owner-model");
+const blacklistTokenModel = require("../models/user-model");
 
-module.exports = async function (req, res, next) {
-  if (!req.cookies.token) {
-    req.flash("error", "you need to login first");
-    return res.redirect("/");
-  }
-
-  try {
-    let decoded = jwt.verify(req.cookies.token, process.env.JWT_KEY);
-    let user = await userModel
-      .findOne({ email: decoded.email })
-      .select("-password");
-    req.user = user;
-    next();
-  } catch (err) {
-    req.flash("error", "you need to login first");
-    res.redirect("/");
-  }
+module.exports.isloggedIn = async function (req, res, next) {
+ const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized access.' });
+    }
+    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+    if (isBlacklisted) {
+        return res.status(401).json({ message: 'Unauthorized access.' });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        const user = await userModel.findById(decoded);
+        console.log(user);
+        req.user = user;
+        next();
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({ message: 'Unauthorized access.' });
+    }
 };
+
+module.exports.authOwer = async (req, res, next) => {
+    const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized access' });
+    }
+    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+    if (isBlacklisted) {
+        return res.status(401).json({ message: 'Unauthorized access.' });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_KEY);
+        console.log(decoded._id)
+        const Ower = await owerModel.findById(decoded._id);
+        console.log(Ower);
+        req.Ower = Ower;
+        next();
+    } catch (err) {
+        console.error(err);
+        return res.status(401).json({ message: 'Unauthorized access..' });
+    }
+}

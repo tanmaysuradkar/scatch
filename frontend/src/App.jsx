@@ -10,6 +10,10 @@ import MyProductList from './components/pages/MyProductList'
 import ContactSection from './components/pages/ContactSection'
 import ScrollToTop from './components/pages/ScrollToTop'
 import Profile from './components/pages/Profile'
+import Verified from './components/pages/isVerify'
+import CreateProducts from './components/pages/CreateProduct'
+import UserLogout from './components/pages/UserLogout'
+import UserProtectWrapper from './components/pages/UserProtectWrapper'
 const App = () => {
   return (
     <div>
@@ -17,12 +21,14 @@ const App = () => {
       <Route path='/' element={<Home />}/>
       <Route path='/Sigup' element={<Signi />}/>
       <Route path='/Login' element={<Login  />}/>
-      <Route path='/MyAccount' element={<Profile />}/>
-      <Route path='/EmailVerfytion' element={<Signi />}/>
+      <Route path='/Logout' element={<UserLogout  />}/>
+      <Route path='/MyAccount' element={<UserProtectWrapper><Profile /></UserProtectWrapper>}/>
       <Route path='/Shop' element={<ProductCard />}/>
-      <Route path='/Wish' element={<MyProductList />}/>
-      <Route path='/Product' element={<ProductsSection />}/>
-      <Route path='/tanmay' element={<ScrollToTop />}/>
+      <Route path='/CART' element={<MyProductList />}/>
+      <Route path='/Product/:productId' element={<ProductsSection />}/>
+      <Route path='/contact' element={<ContactSection />}/>
+      <Route path='/CreateProducts' element={<CreateProducts />}/>
+      <Route path='/verified/:id' element={<Verified />}/>
     </Routes>
     </div>
   )
