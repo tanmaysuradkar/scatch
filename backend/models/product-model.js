@@ -1,18 +1,29 @@
 const mongoose = require("mongoose");
+const { type } = require("os");
 
 const productSchema = mongoose.Schema({
   image: String,
   name: String,
-  Categories: String,
-  price: Number,
+  Categories: {
+    type: String,
+    enum: ['Casual', 'Formal', 'Party', 'Gym'],
+  },
+  genStyles: {
+    type: String,
+    enum: [ 'Feman', 'Man', 'kids' , "ALL"],
+  },
+  price: {
+    type: Number,
+    default:0
+  },
   discount: {
     type: Number,
     default: 0,
   },
   color: String,
   review:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref: 'reviews'
+    type:[],
+    default: [],
   }
 });
 

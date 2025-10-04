@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState  } from "react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
+import axios from "axios";
+
 export default function CreateAccount() {
   const [showVerification, setShowVerification] = useState(false);
+  const [showVerificationMessage, setShowVerificationMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -11,7 +14,6 @@ export default function CreateAccount() {
     password: "",
   });
   const [errors, setErrors] = useState({});
-
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -29,20 +31,9 @@ export default function CreateAccount() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
     }
-
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
@@ -52,13 +43,38 @@ export default function CreateAccount() {
     return newErrors;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    setShowVerification(true);
+      const newUser = {
+        fullname: formData.firstName + " "+ formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      };
+      try {
+      const response = await axios.post(
+      `${import.meta.env.VITE_backendURL}users/register`,
+      newUser
+      );
+      
+      if (response.status === 201) {
+        const data = response.data;
+        setShowVerification(true);
+      }
+      } catch (error) {
+        if (error.status === 401) {
+          setShowVerificationMessage(error.response.data.header);
+        console.log(error.response.data || "")
+        setShowVerification(true);
+      }
+        setShowVerification(true);
+        console.log(error, "gyugguyg")
+      }
+      
+    
   };
 
   const closeModal = () => {
@@ -70,7 +86,7 @@ export default function CreateAccount() {
   };
 
   const handleSocialLogin = (provider) => {
-    alert(`${provider} login functionality would be implemented here`);
+    window.open(`${import.meta.env.VITE_backendURL}auth/google`, "_self");
   };
 
   return (
@@ -170,7 +186,7 @@ export default function CreateAccount() {
                 )}
               </div>
             </div>
-                <p className="mt-5 -mb-3">OR</p>
+            <p className="mt-5 -mb-3">OR</p>
             {/* Social login buttons */}
             <div className="mt-6 flex justify-center space-x-4">
               <button
@@ -265,24 +281,23 @@ export default function CreateAccount() {
               </button>
 
               <h3 className="text-xl font-semibold text-center mb-6">
-                Verify Your Email Address
+                {showVerificationMessage}
               </h3>
 
               <p className="text-gray-600 text-center text-sm mb-6 leading-relaxed">
                 We've Sent An Email To{" "}
                 <span className="font-medium">
-                  {formData.email || "Nina@Gmail.Com"}
+                  {formData.email}
                 </span>{" "}
-                To Verify Your Email Address And Activate Your Account. The Link
-                In The Email Will Expire In 24 Hours.
+               {showVerificationMessage} on this <span className="font-medium">
+                  {formData.email}
+                </span>{" "}
               </p>
 
               <p className="text-center text-sm text-gray-600">
-                <a href="#" className="text-blue-600 hover:underline">
-                  Click Here
-                </a>{" "}
+                {" "}
                 If You Did Not Receive An Email Or Would Like To Change The
-                Email Address You Registered With.
+                Email Address You Registered With, then try again.
               </p>
             </div>
           </div>

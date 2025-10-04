@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,16 +14,20 @@ const ScrollToTop = () => {
 
   // Set the scroll event listener
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   // Scroll to top function
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    const scrollStep = -window.scrollY / 50; // smaller = slower
+    const scrollInterval = setInterval(() => {
+      if (window.scrollY !== 0) {
+        window.scrollBy(0, scrollStep);
+      } else {
+        clearInterval(scrollInterval);
+      }
+    }, 16); // ~60fps
   };
 
   return (
@@ -31,23 +35,30 @@ const ScrollToTop = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 p-3 rounded-full bg-black text-white shadow-lg hover:bg-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-all duration-300 z-50"
-          aria-label="Scroll to top"
+          onMouseEnter={() => {
+            props.sethover(true);
+          }}
+          onMouseLeave={() => {
+            props.sethover(false);
+          }}
+          className="flex z-50 absolute bottom-20 right-10 items-center gap-3 text-black font-medium hover:text-gray-900 transition-colors"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            />
-          </svg>
+          BACK TO TOP
+          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center hover:bg-black transition-colors">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 15l7-7 7 7"
+              ></path>
+            </svg>
+          </div>
         </button>
       )}
     </>

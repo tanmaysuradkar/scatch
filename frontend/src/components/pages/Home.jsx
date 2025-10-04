@@ -10,7 +10,7 @@ import NewsletterSection from './NewsletterSection'
 import ScrollToTop from './ScrollToTop'
 function Home() {
   return (
-   <div className="min-h-screen w-full bg-white">
+   <div className="min-h-screen relative w-full bg-white">
       <Header />
       <main>
         <HeroSection />
