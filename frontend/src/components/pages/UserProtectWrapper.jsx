@@ -15,15 +15,17 @@ const UserProtectWrapper = ({
         if (!token) {
             navigate('/login')
         }
-
-        axios.get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
+        console.log(token,"tanmay My account")
+        axios.post(`${import.meta.env.VITE_backendURL}users/profile`,{}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }).then(response => {
             if (response.status === 200) {
-                setUserAuth(response.data)
+                console.log(response.data.user)
+                setUserAuth(response.data.user)
                 setIsLoading(false)
+                console.log(userAuth)
             }
         }).catch(err => {
                 console.log(err)

@@ -7,6 +7,7 @@ const reviewsSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
+  usernamefull:String,
   product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "product",

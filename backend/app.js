@@ -13,23 +13,29 @@ const productsRouter = require("./routes/products.route");
 const usersRouter = require("./routes/users.route");
 const reviewsRouter = require("./routes/reviews.route");
 const indexRouter = require("./routes/index");
+const paymentRoutes = require("./routes/payment.route");
 
 const db = require("./config/mongoose-connection");
 
 app.use(
   session({
-    secret: "tanmayLoveSecret", // 💞 change this to something private
+    secret: process.env.EXPRESS_SESSION_SECRET || "tanmayLoveSecret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // use true if https
+    cookie: {
+      secure: false, // true if HTTPS
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
   })
 );
+
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(cors({
-  origin: `${process.env.frontentURL}`, // my frontend URL
+  origin: `http://localhost:5173`, // my frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -52,6 +58,7 @@ app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 app.use("/reviews", reviewsRouter);
+app.use("/payment", paymentRoutes);
 app.listen(4000);
 
 

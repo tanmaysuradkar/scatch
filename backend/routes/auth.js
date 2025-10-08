@@ -1,8 +1,7 @@
 const express = require("express");
 let GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
-const router = express.Router();
-const UserModel = require("../models/user-model ")
+const UserModel = require("../models/user-model");
 
 passport.use(
   new GoogleStrategy(
@@ -14,7 +13,9 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         // check if user already exists
-        let existingUser = await UserModel.findOne({ email: profile.emails?.[0]?.value });
+        let existingUser = await UserModel.findOne({
+          email: profile.emails?.[0]?.value,
+        });
 
         if (!existingUser) {
           // create new user
@@ -22,14 +23,14 @@ passport.use(
             fullname: profile.displayName,
             email: profile.emails?.[0]?.value,
             picture: profile.photos?.[0]?.value,
-            isVerify:true
+            isVerify: true,
           });
-
+          let token = newUser.generateAuthToken();
           await newUser.save();
-          return done(null, newUser);
+          return done(null, { userInfo: newUser, token: token });
         } else {
-          // user already exists
-          return done(null, existingUser);
+          const token = existingUser.generateAuthToken();
+          return done(null, { userInfo: existingUser, token });
         }
       } catch (err) {
         return done(err, null);
@@ -45,4 +46,3 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-module.exports = router;

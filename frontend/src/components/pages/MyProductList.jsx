@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
-import { UserDataContext } from "../../context/UserContext";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
+import { UserDataContext } from "../../context/UserContext";
 export default function ShoppingCartPage() {
-  const { userAuth } = useContext(UserDataContext);
-    const [messageOfCart, setMessageOfCart] = useState("Server Erron, try larst")
+  const { userAuth, setUserAuth } = useContext(UserDataContext)
+  console.log(userAuth)
+  const [messageOfCart, setMessageOfCart] = useState("Server Erron, try larst");
   const [cartItems, setCartItems] = useState([
     {
       product: {
@@ -23,23 +24,26 @@ export default function ShoppingCartPage() {
   const [promoCode, setPromoCode] = useState("");
   const handleShowCartDetial = async (e) => {
     try {
+      console.log("user id :-", e);
       // Replace with your API endpoint
       const res = await axios.post(
         `${import.meta.env.VITE_backendURL}users/getOrder`,
-        { userId: userAuth._id }
+        { userId: e }
       );
       console.log("jdijad", res);
       if (res.status == 201) {
         setCartItems(res.data.cart);
       }
     } catch (err) {
-      console.log(userAuth);
+      console.log(e);
       console.log(err);
       setMessageOfCart(err.response.data.message);
     }
   };
   useEffect(() => {
-    handleShowCartDetial();
+    if (userAuth?._id) {
+      handleShowCartDetial(userAuth._id);
+    }
   }, [userAuth]);
   // Calculate totals
   const subtotal = cartItems.reduce(
@@ -93,9 +97,9 @@ export default function ShoppingCartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           {cartItems.length <= 0 && (
-          <div className="flex items-center mb-10 font-bold justify-center text-center w-full">
-            <h1 className="text-black text-5xl">{messageOfCart}</h1>
-          </div>
+            <div className="flex items-center mb-10 font-bold justify-center text-center w-full">
+              <h1 className="text-black text-5xl">{messageOfCart}</h1>
+            </div>
           )}
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (

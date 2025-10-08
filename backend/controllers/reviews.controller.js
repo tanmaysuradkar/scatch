@@ -3,50 +3,53 @@ const userModel = require("../models/user-model");
 const productModel = require("../models/product-model");
 
 module.exports.createReview = async function (req, res) {
-  console.log("working in controller");
+  console.log("Working in review controller...");
+
   try {
-    let { username, message, rating, productId } = req.body;
-    let isUser = await userModel.findOne({ _id: username });
-    console.log(isUser);
+    const { username, message, rating, productId } = req.body;
+
+    // Validate user existence
+    const isUser = await userModel.findOne({ _id: username });
     if (!isUser) {
-      res.status(401).json({
-        message: "Not Working Review Route",
-        product: {
-          heloo: "aktjnwjliseaz;krmf;n",
-        },
+      return res.status(401).json({
+        message: "User not found",
       });
-    } else {
-      let isProduct = productModel.findOne({ _id: productId });
-      if (!isProduct) {
-        res.status(401).json({
-          message: "Not Working Review Route",
-          product: {
-            heloo: "aktjnwjliseaz;krmf;n",
-          },
-        });
-      } else {
-        let reviews = reviewsModel.create({
-          product: productId,
-          username: username,
-          message,
-          rating,
-        });
-        res.status(201).json({
-          message: "Create review successfully",
-          reviews: {
-            _id: reviews._id,
-            username: username,
-            message: message,
-            product: productId,
-            rating: rating,
-          },
-        });
-      }
     }
+
+    // Validate product existence
+    const isProduct = await productModel.findOne({ _id: productId });
+    if (!isProduct) {
+      return res.status(401).json({
+        message: "Product not found",
+      });
+    }
+
+    // Create review 
+    const review = await reviewsModel.create({
+      product: productId,
+      username: username,
+      usernamefull: isUser.fullname,
+      message,
+      rating,
+    });
+
+    res.status(201).json({
+      message: "Review created successfully ",
+      review: {
+        usernamefull: isUser.fullname,
+        _id: review._id,
+        user: username,
+        message,
+        product: productId,
+        rating,
+      },
+    });
+
   } catch (error) {
-    console.log("Err ", error);
-    res.status(400).json({
-      tanmay: "tanmay start",
+    console.error("Error creating review:", error);
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message,
     });
   }
 };
@@ -86,27 +89,29 @@ module.exports.deleteReview = async function (req, res) {
 module.exports.getReview = async function (req, res) {
   console.log("working in controller of reviews");
   let { getType, userId, productId } = req.body;
-  let id = productId;
-  if (!(getType == "product")) {
-    id = userId;
-  }
-try {
-   const review = await reviewsModel.find({ getType: id });
-  if (!review || review.length === 0) {
-    return res.status(404).json({
-      message: "No Review found",
-      Product: review,
+  try {
+    let reviews;
+    if (getType === "product") {
+      reviews = await reviewsModel.find({ product: productId });
+    } else {
+      reviews = await reviewsModel.find({ username: userId });
+    }
+    console.log(reviews);
+    if (!reviews || reviews.length === 0) {
+      return res.status(404).json({
+        message: "No Review found",
+        review: reviews,
+      });
+    }
+    res.status(200).json({
+      message: "Review fetched successfully",
+      review: reviews,
     });
-  }
-  res.status(200).json({
-    message: "Review fetched successfully",
-    review: review,
-  });
-} catch (error) {
-   console.error("Server Error:", error);
+  } catch (error) {
+    console.error("Server Error:", error);
     res.status(500).json({
-      message: "Server Error",
+      message: "No Review found",
       error: error.message,
     });
-}
+  }
 };

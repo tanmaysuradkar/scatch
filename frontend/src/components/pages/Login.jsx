@@ -57,7 +57,7 @@ export default function CreateAccount() {
   };
 
   const handleSocialLogin = (provider) => {
-    alert(`${provider} login functionality would be implemented here`);
+    window.open(`${import.meta.env.VITE_backendURL}auth/google`, "_self");
   };
 
   return (

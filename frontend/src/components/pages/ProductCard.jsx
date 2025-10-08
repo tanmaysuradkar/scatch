@@ -3,7 +3,7 @@ import { ChevronDown, Star, X, SlidersHorizontal, Route } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
-import { Routes, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const EcommerceProductPage = () => {
   const navigate = useNavigate();

@@ -14,17 +14,19 @@ import Verified from './components/pages/isVerify'
 import CreateProducts from './components/pages/CreateProduct'
 import UserLogout from './components/pages/UserLogout'
 import UserProtectWrapper from './components/pages/UserProtectWrapper'
+import OAuthWrapper from './components/pages/OAuthWrapper'
 const App = () => {
   return (
     <div>
     <Routes>
       <Route path='/' element={<Home />}/>
-      <Route path='/Sigup' element={<Signi />}/>
+      <Route path='/Signup' element={<Signi />}/>
+      <Route path='/OAuth' element={<OAuthWrapper />}/>
       <Route path='/Login' element={<Login  />}/>
       <Route path='/Logout' element={<UserLogout  />}/>
       <Route path='/MyAccount' element={<UserProtectWrapper><Profile /></UserProtectWrapper>}/>
       <Route path='/Shop' element={<ProductCard />}/>
-      <Route path='/CART' element={<MyProductList />}/>
+      <Route path='/Cart' element={<MyProductList />}/>
       <Route path='/Product/:productId' element={<ProductsSection />}/>
       <Route path='/contact' element={<ContactSection />}/>
       <Route path='/CreateProducts' element={<CreateProducts />}/>
