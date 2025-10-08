@@ -1,22 +1,24 @@
 const userModel = require("../models/user-model");
 const productModel = require("../models/product-model");
-const blacklistTokenaModel = require("../models/blacklistToken.model");
+const blacklistTokenaModel = require("../models/blacklistToken-model");
 const { sendEmail } = require("../helper/nodemailer");
 const jwt = require("jsonwebtoken");
+const passport = require("passport");
 module.exports.registerUser = async function (req, res) {
   try {
     let { email, password, fullname } = req.body;
     let useris = await userModel.findOne({ email: email });
     if (useris) {
-      res
-        .status(401)
-        .json({ header: "User is already, Unauthorized ", message: "heloo" }); // rewrite the message response
+      return res.status(409).json({
+        header: "User already exists ",
+        message: "This email is already registered. Please login instead.",
+      });
     } else {
       const passwordHash = await userModel.hashPassword(password);
       const user = await userModel.create({
         email,
         password: passwordHash,
-        fullname:fullname ,
+        fullname,
       });
       const savedUser = await user.save();
       let mail = await sendEmail({
@@ -40,21 +42,25 @@ module.exports.registerUser = async function (req, res) {
     });
   }
 };
-
 module.exports.loginUser = async function (req, res) {
-  let { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    const user = await userModel.findOne({ email });
 
-  let user = await userModel.findOne({ email: email });
-  if (!user) {
-    req.flash("error", "Email or Password incorrect");
-    return res.redirect("/");
-  }
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
 
-  let result = user.comparePassword(password);
-  if (result) {
-    let token = user.generateAuthToken();
-    res.status(201).json({
-      message: "Create user successfully",
+    const result = await user.comparePassword(password);
+    if (!result) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = user.generateAuthToken();
+    res.cookie("token", token, { httpOnly: true, secure: true });
+
+    res.status(200).json({
+      message: "Login successful ✅",
       user: {
         _id: user._id,
         fullname: user.fullname,
@@ -62,10 +68,9 @@ module.exports.loginUser = async function (req, res) {
         token,
       },
     });
-    res.cookie("token", token);
-    res.redirect("/");
-  } else {
-    req.flash("error", "Email or Password incorrect");
+  } catch (err) {
+    console.log("Error logging in:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -97,60 +102,84 @@ module.exports.verify = async function (req, res) {
 };
 
 module.exports.addOrder = async function (req, res, next) {
-  let { productId, userId, quantity } = req.body;
+  const { productId, userId, quantity } = req.body;
 
   try {
-    let isProduct = await productModel.findOne({ _id: productId });
+    //  Step 1: Validate product
+    const isProduct = await productModel.findById(productId);
     if (!isProduct) {
-      res.status(401).json({
-        header: "project not allow",
-        message: "try larst",
+      return res.status(404).json({
+        header: "Product not found 🌀",
+        message: "Please try again with a valid product ID.",
       });
-    } else {
-      let isUser = await userModel
-        .findOneAndUpdate(
-          { _id: userId },
-          { $set: { orders: [{ quantity, product: isProduct }] } },
-          { new: true } // Returns the updated document
-        )
-        .select("-password");
-      if (!isUser) {
-        res.status(401).json({
-          header: "User not allow",
-          message: "try larst",
-        });
-      } else {
-        res.status(201).json({
-          header: "user orderlist add successfully",
-          message: "Good res",
-        });
-      }
     }
+
+    //  Step 2: Validate user
+    const isUser = await userModel.findById(userId);
+    if (!isUser) {
+      return res.status(404).json({
+        header: "User not found 🚫",
+        message: "Invalid user. Please login again.",
+      });
+    }
+
+    //  Step 3: Check if product already exists in user's orders
+    const existingOrder = isUser.orders.find(
+      (o) => o.product.toString() === productId
+    );
+
+    if (existingOrder) {
+      // If already in cart, update quantity instead of pushing again
+      existingOrder.quantity += Number(quantity);
+    } else {
+      isUser.orders.push({
+        product: isProduct._id,
+        quantity: Number(quantity),
+      });
+    }
+
+    await isUser.save();
+
+    // Step 4: Populate and respond
+    const populatedUser = await userModel
+      .findById(userId)
+      .populate("orders.product")
+      .select("-password");
+
+    res.status(201).json({
+      header: "Order added successfully 👍🏻",
+      message: "User order list updated successfully!",
+      orders: populatedUser.orders,
+    });
   } catch (err) {
-    console.log(err);
-    res.status(401).json({
-      header: "User not allow",
-      message: "try larst",
+    console.error(" Error adding order:", err);
+    res.status(500).json({
+      header: "Something went wrong ",
+      message: err.message,
     });
   }
 };
+
 module.exports.getOrder = async function (req, res, next) {
   let { userId } = req.body;
 
   try {
-    let isUser = await userModel.findOne({_id:userId});
+    let isUser = await userModel.findOne({ _id: userId }).populate({
+      path: "orders.product",
+      model: "product",
+    });
     if (!isUser) {
       res.status(401).json({ message: "Unauthorized access." });
-    } 
-    if(isUser.orders.length <= 0){
-      res.status(201).json({
-      message: "No cart found",
-      cart:isUser.orders
-    });
+    }
+    if (!isUser.orders || isUser.orders.length === 0) {
+      return res.status(200).json({
+        message: "No cart found 🛒",
+        cart: [],
+      });
     }
     res.status(201).json({
       message: "User cart fetched successfully",
-      cart:isUser.orders
+      cart: isUser.orders,
     });
   } catch (err) {
     console.log(err);
@@ -166,13 +195,13 @@ module.exports.getUserProfile = async (req, res) => {
     user: req.user,
   });
 };
-
 module.exports.logoutUser = async (req, res) => {
   res.clearCookie("token");
   const token =
     req.cookies.token || req.headers["authorization"]?.split(" ")[1];
-  await blacklistTokenaModel.create({ token });
+  let blacktoken = await blacklistTokenaModel.create({ token });
   res.status(200).json({
     message: "User logged out successfully",
+    blacktoken,
   });
 };

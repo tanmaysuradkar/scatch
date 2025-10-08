@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const orderSchema = new mongoose.Schema({
+  product: { type: mongoose.Schema.Types.ObjectId, ref:"product"},
+  quantity: Number,
+  orderDate: { type: Date, default: Date.now },
+});
+
 const userSchema = mongoose.Schema({
   fullname: {
       type: String,
@@ -15,7 +21,7 @@ const userSchema = mongoose.Schema({
     default: [],
   },
   orders: {
-    type: Array,
+    type:[orderSchema],
     default: [],
   },
   contact: Number,

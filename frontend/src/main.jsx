@@ -5,7 +5,7 @@ import App from './App'
 import {BrowserRouter} from 'react-router-dom'
 import UserContext from './context/UserContext'
 createRoot(document.getElementById('root')).render(
-  <UserContext>
+  <UserContext key="static">
   {/* <StrictMode> */}
     <BrowserRouter>
     <App />

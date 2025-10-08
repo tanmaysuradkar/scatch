@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Search, ShoppingBag, User, Menu, X } from 'lucide-react';
+import { UserDataContext } from '../../context/UserContext'
+import {useNavigate} from 'react-router-dom'
 const Header = () => {
-const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { userAuth, setUserAuth } = useContext(UserDataContext)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <nav className="w-full z-800 fixed top-3">
       <div className="max-w-7xl relative z-900 bg-white/20 rounded-xl backdrop-blur-md shadow-lg ring-1 ring-black/5 mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,16 +26,16 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
           {/* Left Navigation - Desktop */}
           <div className="hidden md:flex  items-center space-x-6 lg:space-x-8">
-            <a href="/" className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/")} className='text-gray-600 text-sm hover:text-black' >
               Home
             </a>
-            <a href="/Shop"className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/Shop")} className='text-gray-600 text-sm hover:text-black' >
               Product
             </a>
-            <a href="/Product"className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/Product")} className='text-gray-600 text-sm hover:text-black' >
               Categories
             </a>
-            <a href="./Wish"className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/cart")} className='text-gray-600 text-sm hover:text-black' >
               SALE
             </a>
           </div>
@@ -62,13 +66,20 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
             {/* Shopping Bag */}
             <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-               <a href="/Wish" className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
+              <a onClick={()=> navigate("/Cart")} className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
             </div>
-
             {/* User Account */}
-            <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-               <a href="/Sigup" className='h-full w-full' ><User className="h-5.5 w-5.5" /></a>
-            </div>
+            {userAuth && userAuth._id ? (
+              <div className="text-center">
+                <a onClick={()=> navigate("/Logout")} className='flex-1  bg-black text-white py-1 px-2 rounded-full hover:bg-gray-800 transition-colors font-medium' >Logout</a>
+              </div>
+            ) : (
+              <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
+                <a onClick={()=> navigate("/Signup")} className='h-full w-full'>
+                  <User className="h-5.5 w-5.5" />
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -87,7 +98,7 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
               SALE
             </a>
-            
+
             {/* Mobile Search */}
             <div className="px-3 pt-2">
               <div className="relative">

@@ -18,15 +18,18 @@ router.get(
     failureRedirect: `${process.env.frontentURL}Login`,
   }),
   (req, res) => {
-    // On success, redirect to frontend dashboard/shop
-    res.redirect(`${process.env.frontentURL}Shop`);
+    // On success, redirect to frontend OAuth
+    res.redirect(`${process.env.frontentURL}OAuth`);
   }
 );
 
-router.get("/auth/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
+router.get("/auth/logout", (req, res, next) => {
+  req.logout(function (err) {
+    if (err) { return next(err); }
+    res.redirect("/");
+  });
 });
+
 
 router.get("/auth/user", (req, res) => {
   res.send(req.user);

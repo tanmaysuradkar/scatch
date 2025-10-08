@@ -1,22 +1,19 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState, useEffect } from 'react'
 
 export const UserDataContext = createContext()
 
 
 const UserContext = ({ children }) => {
 
-    const [ userAuth, setUserAuth ] = useState({
-        email: '',
-        fullName: "",
-        _id:""
-    })
-
+    const [userAuth, setUserAuth] = useState({ email: "", fullname: "", _id: "" })
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) setUserAuth(user);
+    }, []);
     return (
-        <div>
             <UserDataContext.Provider value={{ userAuth, setUserAuth }}>
                 {children}
             </UserDataContext.Provider>
-        </div>
     )
 }
 

@@ -2,7 +2,9 @@ import React, { useState  } from "react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function OwenerCreateAccount() {
+  const navigate = useNavigate();
   const [showVerification, setShowVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,17 +49,14 @@ export default function OwenerCreateAccount() {
       setErrors(newErrors);
       return;
     }
-      const newUser = {
-        fullname: {
-          firstname: formData.firstName,
-          lastname: formData.lastName,
-        },
+      const newOwner = {
+        fullname: formData.firstName+" "+ formData.lastName,
         email: formData.email,
         password: formData.password,
       };
       const response = await axios.post(
         `${import.meta.env.VITE_backendURL}owners/create`,
-        newUser
+        newOwner
       );
       if (response.status === 201) {
         const data = response.data;
@@ -176,7 +175,7 @@ export default function OwenerCreateAccount() {
               </div>
             </div>
             <p className="mt-5 -mb-3">OR</p>
-            {/* Social login buttons */}
+            {/* Social login buttons
             <div className="mt-6 flex justify-center space-x-4">
               <button
                 onClick={() => handleSocialLogin("Apple")}
@@ -229,7 +228,7 @@ export default function OwenerCreateAccount() {
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
               </button>
-            </div>
+            </div> */}
 
             <button
               onClick={handleRegister}

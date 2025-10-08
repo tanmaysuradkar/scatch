@@ -1,11 +1,12 @@
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import {useParams} from 'react-router-dom'
+import {useNavigate, useParams} from 'react-router-dom'
 const isVerify = () => {
   const [code, setCode] = React.useState('');
   const [message, setMessage] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const params = useParams();
+  const Navigate = useNavigate();
    
    
   const handleSubmit = async (e) => {
@@ -15,8 +16,8 @@ const isVerify = () => {
       // Replace with your API endpoint
       const res = await axios.post(`${import.meta.env.VITE_backendURL}users/verify`, {token:code} ).then(response => {
             if (response.status === 200) {
-                setUser(response.data)
                 localStorage.setItem('token', data.token)
+                Navigate("/")
             }
         })
       setMessage('Email verified successfully!');

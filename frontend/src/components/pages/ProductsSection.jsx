@@ -22,7 +22,8 @@ import { useParams } from "react-router-dom";
 import { UserDataContext } from "../../context/UserContext";
 
 export default function TShirtProductPage() {
-  const { userAuth } = useContext(UserDataContext);
+  const { userAuth, setUserAuth } = useContext(UserDataContext)
+  console.log(userAuth)
   const [selectedColor, setSelectedColor] = useState("olive");
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -94,16 +95,19 @@ export default function TShirtProductPage() {
   };
   const handleShowProductReviewAll = async (e) => {
     try {
-      // Replace with your API endpoint
       const res = await axios.post(
         `${import.meta.env.VITE_backendURL}reviews/getReview`,
         { productId, getType: "product" }
       );
-      console.log("Response  =>", res.data.Product);
-      setReviews(res.data.review);
+      if (res.status == 200) {
+        console.log("Response  =>", res.data.review);
+        setReviews(res.data.review);
+        console.log(reviews , res.data.review)
+      }
+      console.log(res)
     } catch (err) {
       console.log(productId);
-      console.log(err.response.data);
+      console.log(err.response);
       setMessageOfReview(err.response.data.message)
     }
   };
@@ -176,9 +180,9 @@ export default function TShirtProductPage() {
       showNotificationMessage("Please fill in all fields", "error");
       return;
     }
-
+    console.log(userAuth)
     const review = {
-      username: "user._id",
+      username: userAuth._id,
       productId: productId,
       rating: newReview.rating,
       message: newReview.message,
@@ -209,13 +213,12 @@ export default function TShirtProductPage() {
       {/* Notification */}
       {showNotification && (
         <div
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
-            showNotification.type === "error"
-              ? "bg-red-500"
-              : showNotification.type === "info"
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${showNotification.type === "error"
+            ? "bg-red-500"
+            : showNotification.type === "info"
               ? "bg-blue-500"
               : "bg-green-500"
-          } text-white flex items-center gap-2`}
+            } text-white flex items-center gap-2`}
         >
           <Check className="w-5 h-5" />
           {showNotification.message}
@@ -251,11 +254,10 @@ export default function TShirtProductPage() {
                     <div
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`w-20 h-24 bg-gray-100 rounded-lg border-2 ${
-                        selectedImage === index
-                          ? "border-black"
-                          : "border-gray-200"
-                      } overflow-hidden cursor-pointer hover:border-gray-400 transition-colors`}
+                      className={`w-20 h-24 bg-gray-100 rounded-lg border-2 ${selectedImage === index
+                        ? "border-black"
+                        : "border-gray-200"
+                        } overflow-hidden cursor-pointer hover:border-gray-400 transition-colors`}
                     >
                       <img
                         src={`../${Product.image}`}
@@ -276,11 +278,9 @@ export default function TShirtProductPage() {
               >
                 <img
                   src={`../${Product.image}`}
-                  className={`w-64 h-80 ${
-                    colors.find((c) => c.name === selectedColor)?.bg
-                  } rounded-lg flex items-center justify-center transition-transform ${
-                    isZoomed ? "scale-150" : "scale-100"
-                  }`}
+                  className={`w-64 h-80 ${colors.find((c) => c.name === selectedColor)?.bg
+                    } rounded-lg flex items-center justify-center transition-transform ${isZoomed ? "scale-150" : "scale-100"
+                    }`}
                 />
               </div>
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -311,11 +311,10 @@ export default function TShirtProductPage() {
                   {[...Array(Math.floor(Product.rating))].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < 5
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300 fill-gray-300"
-                      }`}
+                      className={`w-5 h-5 ${i < 5
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300 fill-gray-300"
+                        }`}
                     />
                   ))}
                 </div>
@@ -355,11 +354,10 @@ export default function TShirtProductPage() {
                   style={{ backgroundColor: Product.colours.toLowerCase() }}
                   //lower case Product.colours Black => black
                   onClick={() => setSelectedColor(Product.colours)}
-                  className={`w-10 h-10 rounded-full border-2 ${
-                    selectedColor === Product.colours
-                      ? "border-black"
-                      : "border-gray-300"
-                  } hover:border-gray-400 transition-colors relative`}
+                  className={`w-10 h-10 rounded-full border-2 ${selectedColor === Product.colours
+                    ? "border-black"
+                    : "border-gray-300"
+                    } hover:border-gray-400 transition-colors relative`}
                   title={Product.colours}
                 >
                   {selectedColor === Product.colours && (
@@ -375,40 +373,50 @@ export default function TShirtProductPage() {
             </div>
 
             {/* Quantity and Add to Cart */}
-            {userAuth._id.length < 0 && (
+            {userAuth && userAuth._id ? (
               <div className="flex gap-4">
-              <div className="flex items-center border rounded-full">
+                <div className="flex items-center border rounded-full">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-3 hover:bg-gray-100 rounded-l-full disabled:opacity-50"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="lg:px-4 lg:py-3 md:px-4 md:py-3 font-medium min-w-[60px] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-3 hover:bg-gray-100 rounded-r-full disabled:opacity-50"
+                    disabled={quantity >= 10}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-3 hover:bg-gray-100 rounded-l-full disabled:opacity-50"
-                  disabled={quantity <= 1}
+                  onClick={addToCart}
+                  className="flex-1 bg-black text-white py-3 px-8 rounded-full hover:bg-gray-800 transition-colors font-medium"
                 >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="lg:px-4 lg:py-3 md:px-4 md:py-3 font-medium min-w-[60px] text-center">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-3 hover:bg-gray-100 rounded-r-full disabled:opacity-50"
-                  disabled={quantity >= 10}
-                >
-                  <Plus className="w-4 h-4" />
+                  Add to Cart • ₹
+                  {(
+                    (Product.price - (Product.discount / 100) * Product.price) *
+                    quantity
+                  ).toLocaleString()}
                 </button>
               </div>
-              <button
-                onClick={addToCart}
-                className="flex-1 bg-black text-white py-3 px-8 rounded-full hover:bg-gray-800 transition-colors font-medium"
-              >
-                Add to Cart • ₹
-                {(
-                  (Product.price - (Product.discount / 100) * Product.price) *
-                  quantity
-                ).toLocaleString()}
-              </button>
-            </div>
+            ) : (
+              <div className="text-center">
+                <p>Please login to add items to cart </p>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500"
+                >
+                  Login
+                </button>
+              </div>
             )}
-            
+
 
             {/* Product Features */}
             <div className="border-t pt-6">
@@ -438,11 +446,10 @@ export default function TShirtProductPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-6 py-4 font-medium transition-colors ${
-                  activeTab === tab.key
-                    ? "border-b-2 border-black text-black"
-                    : "text-gray-500 hover:text-black"
-                }`}
+                className={`px-6 py-4 font-medium transition-colors ${activeTab === tab.key
+                  ? "border-b-2 border-black text-black"
+                  : "text-gray-500 hover:text-black"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -532,17 +539,16 @@ export default function TShirtProductPage() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredReviews.map((review) => (
-                  <div key={review.id} className="border rounded-lg p-6">
+                  <div key={review._id} className="border rounded-lg p-6">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
-                            }`}
+                            className={`w-4 h-4 ${i < review.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                              }`}
                           />
                         ))}
                       </div>
@@ -553,8 +559,8 @@ export default function TShirtProductPage() {
                     </div>
 
                     <div className="flex items-center gap-2 mb-3">
-                      <h4 className="font-semibold text-start">
-                        {review.name}
+                      <h4 className="font-semibold text-black text-start">
+                        {review.usernamefull}
                       </h4>
                       {review.verified && (
                         <div
@@ -565,13 +571,13 @@ export default function TShirtProductPage() {
                     </div>
 
                     <p className="text-gray-600 mb-3 text-start">
-                      {review.text}
+                      {review.message}
                     </p>
 
                     <div className="flex justify-between items-center text-sm text-gray-500">
                       <span>Posted on {review.date}</span>
                       <button className="hover:text-gray-700">
-                        Helpful ({review.helpful})
+                        Helpful ({review.help})
                       </button>
                     </div>
                   </div>
@@ -640,11 +646,10 @@ export default function TShirtProductPage() {
                         className="p-1"
                       >
                         <Star
-                          className={`w-6 h-6 ${
-                            i < newReview.rating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-6 h-6 ${i < newReview.rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                            }`}
                         />
                       </button>
                     ))}
