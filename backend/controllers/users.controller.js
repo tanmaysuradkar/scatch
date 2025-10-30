@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 module.exports.registerUser = async function (req, res) {
   try {
-    let { email, password, fullname } = req.body;
+    let { email,password, fullname } = req.body;
     let useris = await userModel.findOne({ email: email });
     if (useris) {
       return res.status(409).json({
@@ -46,34 +46,40 @@ module.exports.loginUser = async function (req, res) {
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email });
-
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({
+        header: "User Unauthorized access.",
+        message: "Invalid email or password, Please login again.",
+      });
     }
-
     const result = await user.comparePassword(password);
+    console.log(result)
     if (!result) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res
+        .status(401)
+        .json({
+          header: "User Unauthorized access.",
+          message: "Invalid  or password, Please login again."
+        });
     }
 
     const token = user.generateAuthToken();
     res.cookie("token", token, { httpOnly: true, secure: true });
 
-    res.status(200).json({
+    res.status(201).json({
       message: "Login successful ✅",
       user: {
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
-        token,
       },
+      token
     });
   } catch (err) {
     console.log("Error logging in:", err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({header: "Internal server error.",message: "server error, Please login again." });
   }
 };
-
 module.exports.verify = async function (req, res) {
   try {
     const { token } = req.body;
@@ -100,7 +106,6 @@ module.exports.verify = async function (req, res) {
     });
   }
 };
-
 module.exports.addOrder = async function (req, res, next) {
   const { productId, userId, quantity } = req.body;
 
@@ -118,7 +123,7 @@ module.exports.addOrder = async function (req, res, next) {
     const isUser = await userModel.findById(userId);
     if (!isUser) {
       return res.status(404).json({
-        header: "User not found 🚫",
+        header: "Unauthorized access. 🚫",
         message: "Invalid user. Please login again.",
       });
     }
@@ -159,7 +164,6 @@ module.exports.addOrder = async function (req, res, next) {
     });
   }
 };
-
 module.exports.getOrder = async function (req, res, next) {
   let { userId } = req.body;
 
@@ -187,6 +191,51 @@ module.exports.getOrder = async function (req, res, next) {
       header: "User not allow",
       message: "",
     });
+  }
+};
+module.exports.deleteOrder = async function (req, res, next) {
+  const { userId, productId } = req.body;
+
+  try {
+    if (!userId || !productId) {
+      return res.status(400).json({ message: "Missing userId or productId in request." });
+    }
+
+    const isUser = await userModel.findById(userId).populate("orders.product");
+    if (!isUser) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+
+    if (!isUser.orders || isUser.orders.length === 0) {
+      return res.status(200).json({ message: "No cart found 🛒", cart: [] });
+    }
+
+    // Find the index of the order entry matching the given productId
+    const orderIndex = isUser.orders.findIndex((o) => {
+      // o.product may be populated (object) or just an id
+      const pid = o.product && o.product._id ? o.product._id.toString() : o.product?.toString();
+      return pid === productId;
+    });
+
+    if (orderIndex === -1) {
+      return res.status(404).json({ message: "Product not found in cart." });
+    }
+
+    // Remove single entry from orders array
+    isUser.orders.splice(orderIndex, 1);
+
+    await isUser.save();
+
+    // Re-populate to ensure product details are present in response
+    const populatedUser = await userModel.findById(userId).populate("orders.product").select("-password");
+
+    return res.status(200).json({
+      message: "Product removed from cart successfully",
+      cart: populatedUser.orders,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ header: "Something went wrong", message: err.message });
   }
 };
 module.exports.getUserProfile = async (req, res) => {

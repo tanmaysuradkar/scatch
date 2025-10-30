@@ -5,7 +5,9 @@ import axios from "axios";
 
 export default function CreateAccount() {
   const [showVerification, setShowVerification] = useState(false);
+  const [doneVerification, setDoneVerification] = useState(false);
   const [showVerificationMessage, setShowVerificationMessage] = useState("");
+  const [showVerificationHeader, setShowVerificationHeader] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -62,11 +64,22 @@ export default function CreateAccount() {
       
       if (response.status === 201) {
         const data = response.data;
+        
+        setDoneVerification(true);
         setShowVerification(true);
       }
       } catch (error) {
         if (error.status === 401) {
-          setShowVerificationMessage(error.response.data.header);
+          setDoneVerification(false);
+          setShowVerificationHeader(error.response.data.header);
+          setShowVerificationMessage(error.response.data.message);
+        console.log(error.response.data || "")
+        setShowVerification(true);
+      }
+      else if (error.status === 409) {
+          setDoneVerification(false);
+          setShowVerificationHeader(error.response.data.header);
+          setShowVerificationMessage(error.response.data.message);
         console.log(error.response.data || "")
         setShowVerification(true);
       }
@@ -249,14 +262,14 @@ export default function CreateAccount() {
               Register Now
             </button>
 
-            <p className="mt-4 text-center text-sm text-gray-600">
+            <p className="mt-2 text-center text-sm text-gray-600">
               Already Have An Account?{" "}
               <a href="Login" className="text-blue-600 hover:underline">
                 Log In
               </a>
             </p>
 
-            <p className="mt-4 text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center">
               By Clicking Register Now You Agree To{" "}
               <a href="#" className="text-blue-600 hover:underline">
                 Terms Conditions
@@ -279,26 +292,28 @@ export default function CreateAccount() {
               >
                 ×
               </button>
-
-              <h3 className="text-xl font-semibold text-center mb-6">
-                {showVerificationMessage}
-              </h3>
-
-              <p className="text-gray-600 text-center text-sm mb-6 leading-relaxed">
+              {doneVerification ?   <p className="text-gray-600 text-center text-sm mb-6 leading-relaxed">
                 We've Sent An Email To{" "}
                 <span className="font-medium">
                   {formData.email}
-                </span>{" "}
-               {showVerificationMessage} on this <span className="font-medium">
+                </span>{" "} on this <span className="font-medium">
                   {formData.email}
                 </span>{" "}
-              </p>
+              </p>:<h3 className="text-xl font-semibold text-center mb-6">
+                {showVerificationHeader}
+              </h3>
+              }
+              
 
-              <p className="text-center text-sm text-gray-600">
+              
+              {doneVerification ? <p className="text-center text-sm text-gray-600">
                 {" "}
                 If You Did Not Receive An Email Or Would Like To Change The
                 Email Address You Registered With, then try again.
-              </p>
+              </p>: <h3 className="text-xl font-semibold text-center mb-6">
+                {showVerificationMessage}
+              </h3>}
+              
             </div>
           </div>
         )}

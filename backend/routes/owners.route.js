@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ownerModel = require("../models/owner-model");
+const ownersController = require("../controllers/owners.controller");
 
 router.post("/create", async function (req, res) {
   let owners = await ownerModel.find();
@@ -24,5 +25,11 @@ router.post("/create", async function (req, res) {
 router.get("/", function (req, res) {
   res.send("hey it's working");
 });
+
+// Return flattened transactions (user email + each ordered product)
+router.get("/transactions", ownersController.getTransactions);
+
+// Update or create payment status for a user+product
+router.post("/updateStatus", ownersController.updatePaymentStatus);
 
 module.exports = router;
