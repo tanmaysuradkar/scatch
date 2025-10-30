@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios'
 export default function CreateAccount() {
+  const Navigate = useNavigate();
   const [showVerification, setShowVerification] = useState(false);
+  const [showVerificationHeader, setShowVerificationHeader] = useState("");
+  const [showVerificationMessage, setShowVerificationMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    userName: "",
+    email: "",
     password: "",
   });
   const [errors, setErrors] = useState({});
@@ -27,8 +32,8 @@ export default function CreateAccount() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.userName.trim()) {
-      newErrors.userName = "First name is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "First name is required";
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -39,12 +44,39 @@ export default function CreateAccount() {
     return newErrors;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async (e) => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+    const newUser = {
+      email: formData.email,
+      password: formData.password,
+    };
+  const response = await axios.post(
+        `${import.meta.env.VITE_backendURL}users/login`,
+        newUser
+      );
+      if (response.status === 201) {
+        const data = response.data;
+        localStorage.setItem('token', data.token)
+        Navigate("/MyAccount")
+      }
+      if (error.status === 401) {
+        setShowVerificationHeader(error.response.data.header);
+        setShowVerificationMessage(error.response.data.message);
+        console.log(error.response.data || "")
+        setShowVerification(true);
+      }
+      else if (error.status === 409) {
+        setShowVerificationHeader(error.response.data.header);
+        setShowVerificationMessage(error.response.data.message);
+        console.log(error.response.data || "")
+        setShowVerification(true);
+      }
+      setShowVerification(true);
+      console.log(error, "login")
     setShowVerification(true);
   };
 
@@ -87,17 +119,16 @@ export default function CreateAccount() {
               <div>
                 <input
                   type="text"
-                  name="userName"
-                  placeholder="User Name"
-                  value={formData.userName}
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    errors.userName ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${errors.email ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
-                {errors.userName && (
+                {errors.email && (
                   <p className="text-red-500 text-xs mt-1">
-                    {errors.userName}
+                    {errors.email}
                   </p>
                 )}
               </div>
@@ -109,9 +140,8 @@ export default function CreateAccount() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm pr-10 ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm pr-10 ${errors.password ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 <button
                   type="button"
@@ -125,7 +155,7 @@ export default function CreateAccount() {
                 )}
               </div>
             </div>
-                <p className="mt-5 -mb-3">OR</p>
+            <p className="mt-5 -mb-3">OR</p>
             {/* Social login buttons */}
             <div className="mt-6 flex justify-center space-x-4">
               <button
@@ -185,11 +215,11 @@ export default function CreateAccount() {
               onClick={handleLogin}
               className="w-full mt-6 bg-black text-white py-3 px-4 rounded-md hover:bg-gray-800 transition-colors font-medium"
             >
-                Login Now
+              Login Now
             </button>
 
             <p className="mt-4 text-center text-sm text-gray-600">
-               Not Have an Account?{" "}
+              Not Have an Account?{" "}
               <a href="#" className="text-blue-600 hover:underline">
                 Register Now
               </a>
@@ -208,7 +238,7 @@ export default function CreateAccount() {
           </div>
         </div>
 
-        {/* Email Verification Modal */}
+        {/* Error Modal */}
         {showVerification && (
           <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg p-8 max-w-md w-full relative">
@@ -220,24 +250,11 @@ export default function CreateAccount() {
               </button>
 
               <h3 className="text-xl font-semibold text-center mb-6">
-                Verify Your Email Address
+                {showVerificationHeader}
               </h3>
 
               <p className="text-gray-600 text-center text-sm mb-6 leading-relaxed">
-                We've Sent An Email To{" "}
-                <span className="font-medium">
-                  {formData.email || "Nina@Gmail.Com"}
-                </span>{" "}
-                To Verify Your Email Address And Activate Your Account. The Link
-                In The Email Will Expire In 24 Hours.
-              </p>
-
-              <p className="text-center text-sm text-gray-600">
-                <a href="#" className="text-blue-600 hover:underline">
-                  Click Here
-                </a>{" "}
-                If You Did Not Receive An Email Or Would Like To Change The
-                Email Address You Registered With.
+                {showVerificationMessage}
               </p>
             </div>
           </div>

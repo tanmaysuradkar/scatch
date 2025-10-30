@@ -4,7 +4,6 @@ module.exports.createProducts = async function (req, res) {
   try {
     let { image, name, Categories, genStyles, price, discount, color } =
       req.body;
-    console.log(image, name, Categories, genStyles, price, discount, color);
     let ProductIs = await productsModels.findOne({ name });
     if (ProductIs) {
       res
@@ -15,7 +14,7 @@ module.exports.createProducts = async function (req, res) {
         image,
         name,
         dressStyles:Categories,
-        color,
+        colours:color,
         genStyles,
         price,
         discount,
@@ -38,8 +37,6 @@ module.exports.deleteProduct = async function (req, res) {
 
   let products = await productsModels.findOne({ name });
   if (!products) {
-    // req.flash("error", "Email or Password incorrect");
-    // return res.redirect("/");
     res.status(401).json({
       message: "Delete Product Not Working",
       product: {
@@ -67,18 +64,16 @@ module.exports.updateProduct = async function (req, res) {
 
   let productIs = await productsModels.findOne({ name });
   if (!productIs) {
-    // req.flash("error", "Email or Password incorrect");
-    // return res.redirect("/");
     res.status(401).json({
-      message: "update Product, Not Working",
+      message: "Delete Product, Not Working OR Product not found",
       product: {
-        heloo: "aktjnwjliseaz;krmf;n",
+        heloo: "Failed Update product, Product not found",
       },
     });
   } else {
     let product = await productIs.findOneAndUpdate({
       image,
-      name,
+      rename,
       Categories,
       price,
       discount,
@@ -131,7 +126,7 @@ module.exports.getProducts = async function (req, res) {
         Product: filterProduct,
       });
     }
-
+    // Return response
     res.status(200).json({
       message: "Products fetched successfully",
       Product: filterProduct,
@@ -153,7 +148,6 @@ module.exports.getProductByOne = async function (req, res) {
 
     // Fetch products from DB
     const Product = await productsModels.findOne({_id:productId});
-console.log(Product)
     if (!Product) {
       return res.status(404).json({
         message: "No products found",

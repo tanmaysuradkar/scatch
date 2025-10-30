@@ -36,7 +36,7 @@ export default function TShirtProductPage() {
   const [reviewFilter, setReviewFilter] = useState("latest");
   const [showReviewModal, setShowReviewModal] = useState(false);
   const params = useParams();
-  const [newReview, setNewReview] = useState({ rating: 5, message: "" });
+  const [newReview, setNewReview] = useState({  rating: 5, message: "" });
   const productId = params.productId.split("=")[1];
   const [reviews, setReviews] = useState([]);
   const [messageOfReview, setMessageOfReview] = useState("Server Erron, try larst")
@@ -102,7 +102,7 @@ export default function TShirtProductPage() {
       if (res.status == 200) {
         console.log("Response  =>", res.data.review);
         setReviews(res.data.review);
-        console.log(reviews , res.data.review)
+        console.log(reviews, res.data.review)
       }
       console.log(res)
     } catch (err) {
@@ -186,6 +186,7 @@ export default function TShirtProductPage() {
       productId: productId,
       rating: newReview.rating,
       message: newReview.message,
+      usernamefull:userAuth.fullname
     };
     const response = await axios.post(
       `${import.meta.env.VITE_backendURL}reviews/createReview`,
@@ -522,12 +523,24 @@ export default function TShirtProductPage() {
                     <option value="lowest">Lowest Rated</option>
                     <option value="helpful">Most Helpful</option>
                   </select>
-                  <button
-                    onClick={() => setShowReviewModal(true)}
-                    className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
-                  >
-                    Write a Review
-                  </button>
+                  {userAuth && userAuth._id ? (
+                    <button
+                      onClick={() => setShowReviewModal(true)}
+                      className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
+                    >
+                      Write a Review
+                    </button>
+                  ) : (
+                    <div className="text-center">
+                      <button
+                        onClick={() => navigate("/login")}
+                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500"
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               </div>
               {filteredReviews.length <= 0 && (

@@ -9,6 +9,7 @@ const {
   getUserProfile,
   logoutUser,
   getOrder,
+  deleteOrder
 } = require("../controllers/users.controller");
 const authMiddleware = require("../middlewares/isLoggedIn");
 const { validateRequest } = require("../middlewares/validateRequest");
@@ -46,6 +47,9 @@ router.post("/addcart", [
       .withMessage("Quantity must be at least 1"),
   ],
   validateRequest, addOrder);
+
+router.post("/deleteOrder", deleteOrder);
+
 router.post("/getOrder", getOrder);
 
 router.get("/logout", authMiddleware.isloggedIn, logoutUser);

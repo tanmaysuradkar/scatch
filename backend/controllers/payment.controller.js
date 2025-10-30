@@ -1,7 +1,7 @@
-const Razorpay = require("razorpay")
-const crypto = require("crypto")
-const Payment = require("../models/payment-model")
-
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+const Payment = require("../models/payment-model");
+const userModel = require("../models/user-model");
 module.exports.createOrder = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -27,7 +27,8 @@ module.exports.createOrder = async (req, res) => {
 
 module.exports.verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
@@ -40,15 +41,19 @@ module.exports.verifyPayment = async (req, res) => {
 
     if (isAuthentic) {
       await Payment.create({
+        product: req.body.orderList,
+        user: req.user._id,
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
         amount: req.body.amount,
         currency: "INR",
-        status: "paid",
+        status: "Paid",
       });
 
-      res.status(200).json({ success: true, message: "Payment verified successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "Payment verified successfully" });
     } else {
       res.status(400).json({ success: false, message: "Invalid Signature" });
     }

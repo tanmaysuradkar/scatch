@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, Save, Eye, EyeOff } from 'lucide-react';
 import Header from '../layout/Header'
 import Footer from '../layout/Footer'
+
+import { UserDataContext } from "../../context/UserContext";
+
 export default function UserProfile() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -9,20 +12,17 @@ export default function UserProfile() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  
+    const { userAuth } = useContext(UserDataContext);
+    console.log(userAuth)
   const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    dateOfBirth: '13/03/2001',
-    dayMonthYear: 'DD/MM/DD',
-    state: 'Kerala',
-    address: 'My House - 234Street',
-    pinCode: '680004',
-    addressType: 'Home',
+    fullname: userAuth.fullname ||'tanmay suradkar',
+    state: '',
+    address: '',
+    pinCode: '',
+    addressType: '',
     landmark: '',
-    mobileNumber: '+91 96567 88677',
-    email: 'Sumithabu@gmail.com',
-    alternateNumber: ''
+    mobileNumber: '',
+    email: userAuth.email || '',
   });
 
   const [originalData, setOriginalData] = useState({ ...formData });
@@ -54,12 +54,8 @@ export default function UserProfile() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+    if (!formData.fullname.trim()) {
+      newErrors.fullname = 'First name is required';
     }
     
     if (!formData.email.trim()) {
@@ -82,10 +78,6 @@ export default function UserProfile() {
       newErrors.pinCode = 'Pin code is required';
     } else if (!/^\d{6}$/.test(formData.pinCode)) {
       newErrors.pinCode = 'Pin code must be 6 digits';
-    }
-    
-    if (!formData.dateOfBirth.trim()) {
-      newErrors.dateOfBirth = 'Date of birth is required';
     }
     
     return newErrors;
@@ -141,45 +133,15 @@ export default function UserProfile() {
     
     setActiveSection(sectionId);
     setSidebarOpen(false);
-    
-    // Simulate navigation to different sections
-    if (sectionId !== 'overview') {
-      alert(`Navigating to ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} section`);
-    }
   };
 
   const menuItems = [
     { id: 'overview', icon: User, label: 'Account Overview', active: true },
-    { id: 'orders', icon: Package, label: 'My Orders', active: false },
-    { id: 'addresses', icon: MapPin, label: 'Manage Addresses', active: false },
-    { id: 'wallet', icon: Wallet, label: 'Wallet', active: false }
+    { id: 'orders', icon: Package, label: 'My Orders', active: false }
   ];
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const formatDateOfBirth = (value) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
-    
-    // Format as DD/MM/YYYY
-    if (digits.length >= 6) {
-      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
-    } else if (digits.length >= 4) {
-      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-    } else if (digits.length >= 2) {
-      return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    }
-    return digits;
-  };
-
-  const handleDateChange = (e) => {
-    const formatted = formatDateOfBirth(e.target.value);
-    setFormData({
-      ...formData,
-      dateOfBirth: formatted
-    });
   };
 
   return (
@@ -228,7 +190,7 @@ export default function UserProfile() {
             </div>
           </div>
           <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
-            Susmitha S
+            {userAuth.fullname}
           </div>
         </div>
 
@@ -298,80 +260,23 @@ export default function UserProfile() {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-4 lg:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
-              {/* First Name */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 justify-center items-center text-center gap-4 lg:gap-6 mb-4 lg:mb-6">
+              {/* full Name And State*/}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                 <input
                   type="text"
-                  name="firstName"
-                  value={formData.firstName}
+                  name="fullname"
+                  value={formData.fullname}
                   onChange={handleInputChange}
                   className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
                     isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.firstName ? 'border-red-500' : 'border-gray-300'}`}
+                  } ${errors.fullname ? 'border-red-500' : 'border-gray-300'}`}
                   readOnly={!isEditing}
                 />
-                {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                {errors.fullname && <p className="text-red-500 text-xs mt-1">{errors.fullname}</p>}
               </div>
-
-              {/* Last Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.lastName ? 'border-red-500' : 'border-gray-300'}`}
-                  readOnly={!isEditing}
-                />
-                {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
-              </div>
-            </div>
-
-            {/* Date of Birth */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleDateChange}
-                    placeholder="DD/MM/YYYY"
-                    maxLength="10"
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm pr-10 ${
-                      isEditing ? 'bg-white' : 'bg-gray-50'
-                    } ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
-                    readOnly={!isEditing}
-                  />
-                  <Calendar size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                </div>
-                {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Day / Month / Year</label>
-                <input
-                  type="text"
-                  name="dayMonthYear"
-                  value={formData.dayMonthYear}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } border-gray-300`}
-                  readOnly={!isEditing}
-                />
-              </div>
-            </div>
-
-            {/* State */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
-              <div>
+               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
                 <div className="relative">
                   <select
@@ -390,7 +295,6 @@ export default function UserProfile() {
                   <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-              <div></div>
             </div>
 
             {/* Address */}
@@ -508,20 +412,7 @@ export default function UserProfile() {
               </div>
             </div>
 
-            <div className="mb-6 lg:mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Alternate Number (Optional)</label>
-              <input
-                type="text"
-                name="alternateNumber"
-                value={formData.alternateNumber}
-                onChange={handleInputChange}
-                placeholder="+91 xxxxx xxxxx"
-                className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                } border-gray-300`}
-                readOnly={!isEditing}
-              />
-            </div>
+            
 
             {/* Edit Button */}
             <div className="flex justify-center">

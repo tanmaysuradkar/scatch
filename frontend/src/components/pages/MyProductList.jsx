@@ -3,24 +3,32 @@ import { Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 import { UserDataContext } from "../../context/UserContext";
 export default function ShoppingCartPage() {
-  const { userAuth, setUserAuth } = useContext(UserDataContext)
-  console.log(userAuth)
-  const [messageOfCart, setMessageOfCart] = useState("Server Erron, try larst");
+  const navigate = useNavigate();
+
+  
+  const { userAuth, setUserAuth } = useContext(UserDataContext);
+  console.log(userAuth);
+  const [messageOfCart, setMessageOfCart] = useState("No cart found 🛒");
   const [cartItems, setCartItems] = useState([
-    {
-      product: {
-        _id: 1,
-        name: "Gradient Graphic T-shirt",
-        discount: 0,
-        color: "White",
-        price: 145,
-        image: "/api/placeholder/80/80",
-      },
-      quantity: 1,
-    },
+    // {
+      //   product: {
+        //     _id: 1,
+        //     name: "Gradient Graphic T-shirt",
+        //     discount: 0,
+    //     color: "White",
+    //     price: 145,
+    //     image: "/api/placeholder/80/80",
+    //   },
+    //   quantity: 1,
+    // },
   ]);
+  const handleCheckout = () => {
+    navigate("/Paymant", {  state: { total , cartItems } });
+  };
   const [promoCode, setPromoCode] = useState("");
   const handleShowCartDetial = async (e) => {
     try {
@@ -65,8 +73,28 @@ export default function ShoppingCartPage() {
   };
 
   // Remove item
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item.product._id !== id));
+  const removeItem = async (id) => {
+    try {
+      // If user is logged in, request backend to delete the item from DB
+      if (userAuth?._id) {
+        const res = await axios.post(
+          `${import.meta.env.VITE_backendURL}users/deleteOrder`,
+          { userId: userAuth._id, productId: id }
+        );
+
+        // If backend returns updated cart, use it. Otherwise fall back to local update.
+        if (res?.status === 200 && res.data?.cart) {
+          return setCartItems(res.data.cart);
+        }
+      }
+
+      // Fallback / optimistic update for unauthenticated users or unexpected responses
+      setCartItems((items) => items.filter((item) => item.product._id !== id));
+    } catch (err) {
+      console.error("Error removing item:", err);
+      // Still remove locally to keep UI responsive; consider showing an error toast
+      setCartItems((items) => items.filter((item) => item.product._id !== id));
+    }
   };
 
   // Apply promo code
@@ -225,7 +253,10 @@ export default function ShoppingCartPage() {
             </div>
 
             {/* Checkout Button */}
-            <button className="w-full bg-black text-white py-4 px-6 rounded-full hover:bg-gray-800 transition-colors font-medium flex items-center justify-center gap-2">
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-black text-white py-4 px-6 rounded-full hover:bg-gray-800 transition-colors font-medium flex items-center justify-center gap-2"
+            >
               Go to Checkout
               <ArrowRight className="w-5 h-5" />
             </button>

@@ -54,36 +54,35 @@ module.exports.createReview = async function (req, res) {
   }
 };
 module.exports.deleteReview = async function (req, res) {
-  let { reviewId, username } = req.body;
-  let isUser = await userModel.findOne({ _id: username });
-  console.log(isUser);
-  if (!isUser) {
-    res.status(401).json({
-      message: "Delete Product Not Working",
-      product: {
-        heloo: "aktjnwjliseaz;krmf;n",
-      },
-    });
-  } else {
-    let review = await reviewsModel.findOneAndDelete({ _id: reviewId });
-    if (!review) {
-      res.status(401).json({
-        message: "Delete Product Not Working",
-        product: {
-          heloo: "aktjnwjliseaz;krmf;n",
-        },
-      });
-    } else {
-      res.status(201).json({
-        message: "Delete review Successfully",
-        review: {
-          _id: review._id,
-          title: review.title,
-          username: review.username,
-          message: review.message,
-        },
-      });
+  try {
+    const { reviewId, username } = req.body;
+
+    if (!reviewId || !username) {
+      return res.status(400).json({ message: "reviewId and username are required" });
     }
+
+    // Verify user exists
+    const isUser = await userModel.findById(username);
+    if (!isUser) {
+      return res.status(401).json({ message: "Unauthorized: user not found" });
+    }
+
+    const review = await reviewsModel.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Only the review owner (username) can delete the review
+    if (review.username.toString() !== username.toString()) {
+      return res.status(403).json({ message: "Forbidden: you are not the owner of this review" });
+    }
+
+    await reviewsModel.findByIdAndDelete(reviewId);
+
+    return res.status(200).json({ message: "Review deleted successfully", reviewId });
+  } catch (err) {
+    console.error("Error deleting review:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 module.exports.getReview = async function (req, res) {

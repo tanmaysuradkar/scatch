@@ -1,27 +1,26 @@
-const { Type } = require("ajv/dist/compile/util");
 const mongoose = require("mongoose");
-const { type } = require("os");
 
-const reviewsSchema = mongoose.Schema({
-  username: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+const reviewsSchema = new mongoose.Schema(
+  {
+    username: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+    usernamefull: { type: String },
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "product",
+      required: true,
+    },
+    message: { type: String, required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    help: {
+      type: Number,
+      default: 0,
+    },
   },
-  usernamefull:String,
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "product",
-  },
-  message: String,
-  rating: Number,
-  help: {
-    type: Number,
-    default: 0,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("reviews", reviewsSchema);
+module.exports = mongoose.model("review", reviewsSchema);
