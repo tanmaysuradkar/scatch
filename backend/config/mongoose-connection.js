@@ -1,15 +1,17 @@
 const mongoose = require("mongoose");
-const config = require("config");
-
 const dbgr = require("debug")("development:mongoose");
+const MONGODB_URI = process.env.MONGODB_URI;
 
+if (!MONGODB_URI) {
+  throw new Error("MONGODB_URI is not defined in environment variables");
+}
 mongoose
-  .connect(`${config.get("MONGODB_URI")}/scatch`)
+  .connect(`${MONGODB_URI}/scatch`)
   .then(function () {
-    dbgr("connected");
+    dbgr("MongoDB connected");
   })
   .catch(function (err) {
-    dbgr(err);
+    dbgr("MongoDB connection error:",err);
   });
 
 module.exports = mongoose.connection;
