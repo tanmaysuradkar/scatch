@@ -1,5 +1,5 @@
 const UserModel = require("../models/user-model");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 
 module.exports.sendEmail = async ({ email, emailType, user }) => {
