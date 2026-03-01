@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, Save, Eye, EyeOff, Trash2 } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
-
-import { UserDataContext } from "../../context/UserContext";
 
 export default function OwenerProfile() {
   const [productData, setProductData] = useState({
@@ -57,8 +55,6 @@ export default function OwenerProfile() {
 
   const categoryOptions = ["Casual", "Formal", "Party", "Gym"];
   const genStyleOptions = ["Feman", "Man", "kids", "ALL"];
-
-  const { userAuth } = useContext(UserDataContext);
   const [transactions, setTransactions] = useState([]);
   console.log(transactions)
   const [loading, setLoading] = useState(false);

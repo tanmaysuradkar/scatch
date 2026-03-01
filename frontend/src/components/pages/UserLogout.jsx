@@ -1,17 +1,19 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { UserDataContext } from '../../context/UserContext';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserInfo, clearUserInfo } from '../../redux/features/userInfo'
 export const UserLogout = () => {
   const navigate = useNavigate();
-  const { setUserAuth } = useContext(UserDataContext);
+  const userAuth = useSelector((state) => state.userInformation.value)
+  const setUserAuth = setUserAuth;
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const logoutUser = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        setUserAuth(null);
+        dispatch(clearUserInfo());
         navigate('/login');
         return;
       }
@@ -29,14 +31,14 @@ export const UserLogout = () => {
 
         if (response.status === 200) {
           localStorage.removeItem('token');
-          setUserAuth(null);
+          dispatch(clearUserInfo());
           navigate('/login');
         }
       } catch (error) {
         // 401 just means the token is already blacklisted
         if (error.response?.status === 401) {
           localStorage.removeItem('token');
-          setUserAuth(null);
+          dispatch(clearUserInfo());
           navigate('/login');
         } else {
           console.error('Logout error:', error);

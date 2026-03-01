@@ -1,10 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Search, ShoppingBag, User, Menu, X } from 'lucide-react';
-import { UserDataContext } from '../../context/UserContext'
 import {useNavigate} from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import {setUserInfo,clearUserInfo} from '../../redux/features/userInfo'
 const Header = () => {
+    const userAuth = useSelector((state)=> state.userInformation.value)
+    console.log(userInfo);
+    const dispatch = useDispatch()
+
   const navigate = useNavigate();
-  const { userAuth, setUserAuth } = useContext(UserDataContext)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <nav className="w-full z-800 fixed top-3">

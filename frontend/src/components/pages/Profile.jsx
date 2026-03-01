@@ -1,9 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState} from 'react';
 import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, Save, Eye, EyeOff } from 'lucide-react';
 import Header from '../layout/Header'
 import Footer from '../layout/Footer'
-
-import { UserDataContext } from "../../context/UserContext";
+import { useSelector } from 'react-redux'
 
 export default function UserProfile() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -12,7 +11,7 @@ export default function UserProfile() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-    const { userAuth } = useContext(UserDataContext);
+      const userAuth = useSelector((state)=> state.userInformation.value);
     console.log(userAuth)
   const [formData, setFormData] = useState({
     fullname: userAuth.fullname ||'tanmay suradkar',

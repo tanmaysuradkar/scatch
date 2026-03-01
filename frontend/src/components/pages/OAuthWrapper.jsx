@@ -1,20 +1,23 @@
-import React, { useContext, useEffect, useState } from "react";
-import { UserDataContext } from "../../context/UserContext";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { useDispatch, useSelector } from 'react-redux';
+import {setUserInfo,clearUserInfo} from '../../redux/features/userInfo'
 const OAuthWrapper = () => {
+    const userInfo = useSelector((state)=> state.userInformation.value)
+    console.log(userInfo);
+    const dispatch = useDispatch()
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
-    const { userAuth, setUserAuth } = useContext(UserDataContext);
+    const setUserAuth = setUserAuth;
     useEffect(()=> {
         axios
             .get(`${import.meta.env.VITE_backendURL}auth/user`, {
                 withCredentials: true,
             })
             .then(async (res) => {
-                setUserAuth( {email:res.data.userInfo.email, fullname: res.data.userInfo.fullname, _id: res.data.userInfo._id});
+                dispatch(setUserAuth( {email:res.data.userInfo.email, fullname: res.data.userInfo.fullname, _id: res.data.userInfo._id}))
                 localStorage.removeItem("token");
                 console.log("user info:", userAuth);
                 localStorage.setItem("token", res.data.token);
@@ -23,7 +26,7 @@ const OAuthWrapper = () => {
                 navigate("/Shop");
             })
             .catch(() => {
-                setUserAuth(null);
+                dispatch(setUserAuth())
                 console.log("OAuth error:", err);
                 localStorage.removeItem("token");
                 navigate("/login");

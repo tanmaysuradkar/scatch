@@ -3,13 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import {BrowserRouter} from 'react-router-dom'
-import UserContext from './context/UserContext'
+import { Provider } from 'react-redux'
+import { store } from './redux/store'
 createRoot(document.getElementById('root')).render(
-  <UserContext key="static">
-  {/* <StrictMode> */}
+  <StrictMode>
+  <Provider store={store}>
     <BrowserRouter>
     <App />
     </BrowserRouter>
-  {/* </StrictMode> */}
-  </UserContext>,
+  </Provider>
+  </StrictMode>
 )

@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect} from "react";
 import { Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
+import { useSelector } from 'react-redux'
 import { useNavigate } from "react-router-dom";
-
-import { UserDataContext } from "../../context/UserContext";
 export default function ShoppingCartPage() {
   const navigate = useNavigate();
-
-  
-  const { userAuth, setUserAuth } = useContext(UserDataContext);
+  const userAuth = useSelector((state)=> state.userInformation.value)
   console.log(userAuth);
+
   const [messageOfCart, setMessageOfCart] = useState("No cart found 🛒");
   const [cartItems, setCartItems] = useState([
     // {

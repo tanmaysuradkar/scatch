@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Star,
   Plus,
@@ -19,10 +19,10 @@ import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { UserDataContext } from "../../context/UserContext";
+import { useSelector } from 'react-redux'
 
 export default function TShirtProductPage() {
-  const { userAuth, setUserAuth } = useContext(UserDataContext)
+  const userAuth = useSelector((state)=> state.userInformation.value)
   console.log(userAuth)
   const [selectedColor, setSelectedColor] = useState("olive");
   const [selectedSize, setSelectedSize] = useState("M");

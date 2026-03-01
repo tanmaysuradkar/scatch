@@ -1,15 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { UserDataContext } from '../../context/UserContext'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-
+import { useDispatch, useSelector } from 'react-redux';
+import {setUserInfo,clearUserInfo} from '../../redux/features/userInfo'
 const UserProtectWrapper = ({
     children
 }) => {
+    const userAuth = useSelector((state)=> state.userInformation.value)
+    const dispatch = useDispatch()
     const token = localStorage.getItem('token')
     const navigate = useNavigate()
-    const { userAuth, setUserAuth } = useContext(UserDataContext)
     const [ isLoading, setIsLoading ] = useState(true)
+    const setUserAuth = setUserAuth;
 
     useEffect(() => {
         if (!token) {
@@ -23,7 +25,7 @@ const UserProtectWrapper = ({
         }).then(response => {
             if (response.status === 200) {
                 console.log(response.data.user)
-                setUserAuth(response.data.user)
+                dispatch(setUserAuth(response.data.user))
                 setIsLoading(false)
                 console.log(userAuth)
             }
