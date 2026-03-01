@@ -15,11 +15,11 @@ router.get('/auth/google',
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.frontentURL}Login`,
+    failureRedirect: `${process.env.frontentURL}login`,
   }),
   (req, res) => {
     // On success, redirect to frontend OAuth
-    res.redirect(`${process.env.frontentURL}OAuth`);
+    res.redirect(`${process.env.frontentURL}oauth`);
   }
 );
 

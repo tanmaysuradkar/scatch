@@ -61,7 +61,7 @@ export default function CreateAccount() {
       if (response.status === 201) {
         const data = response.data;
         localStorage.setItem('token', data.token)
-        Navigate("/MyAccount")
+        Navigate("/my-account")
       }
       if (error.status === 401) {
         setShowVerificationHeader(error.response.data.header);

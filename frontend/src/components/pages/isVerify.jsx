@@ -17,7 +17,7 @@ const isVerify = () => {
       const res = await axios.post(`${import.meta.env.VITE_backendURL}users/verify`, {token:code} ).then(response => {
             if (response.status === 200) {
                 localStorage.setItem('token', data.token)
-                Navigate("/Shop")
+                Navigate("/shop")
             }
         })
       setMessage('Email verified successfully!');

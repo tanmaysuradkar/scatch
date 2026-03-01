@@ -32,7 +32,7 @@ const Header = () => {
             <a onClick={()=> navigate("/")} className='text-gray-600 text-sm hover:text-black' >
               Home
             </a>
-            <a onClick={()=> navigate("/Shop")} className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/shop")} className='text-gray-600 text-sm hover:text-black' >
               Product
             </a>
             <a onClick={()=> navigate("/Product")} className='text-gray-600 text-sm hover:text-black' >
@@ -69,24 +69,24 @@ const Header = () => {
 
             {/* Shopping Bag */}
             <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-              <a onClick={()=> navigate("/Cart")} className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
+              <a onClick={()=> navigate("/cart")} className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
             </div>
             {/* User Account */}
             {userAuth && userAuth._id ? (
               <>
               
                <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-                <a onClick={()=> navigate("/MyAccount")} className='h-full w-full'>
+                <a onClick={()=> navigate("/my-account")} className='h-full w-full'>
                   <User className="h-5.5 w-5.5" />
                 </a>
               </div>
               <div className="text-center">
-                <a onClick={()=> navigate("/Logout")} className='flex-1  bg-black text-white py-1 px-2 rounded-full hover:bg-gray-800 transition-colors font-medium' >Logout</a>
+                <a onClick={()=> navigate("/logout")} className='flex-1  bg-black text-white py-1 px-2 rounded-full hover:bg-gray-800 transition-colors font-medium' >Logout</a>
               </div>
               </>
             ) : (
              <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-                <a onClick={()=> navigate("/Signup")} className='h-full w-full'>
+                <a onClick={()=> navigate("/signup")} className='h-full w-full'>
                   <User className="h-5.5 w-5.5" />
                 </a>
               </div>

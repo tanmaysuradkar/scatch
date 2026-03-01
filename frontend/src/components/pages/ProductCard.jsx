@@ -124,7 +124,7 @@ const EcommerceProductPage = () => {
     handleSubmitOfProductListALL();
   }, []);
   const goToProduct = (e) => {
-    navigate(`/Product/=${e}`); // Navigates to the /about path
+    navigate(`/product/=${e}`); // Navigates to the /about path
   };
 
   return (

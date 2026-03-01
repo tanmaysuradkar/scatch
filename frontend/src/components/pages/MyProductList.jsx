@@ -25,7 +25,7 @@ export default function ShoppingCartPage() {
     // },
   ]);
   const handleCheckout = () => {
-    navigate("/Paymant", {  state: { total , cartItems } });
+    navigate("/payment", {  state: { total , cartItems } });
   };
   const [promoCode, setPromoCode] = useState("");
   const handleShowCartDetial = async (e) => {

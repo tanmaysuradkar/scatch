@@ -52,10 +52,10 @@ const PaymentPage = () => {
             }});
 
         if (verify.data.success) {
-          navigate("/Cart");
+          navigate("/cart");
           alert("Payment Successful!");
         } else {
-          navigate("/Cart");
+          navigate("/cart");
           alert("Payment Verification Failed!");
         }
       },

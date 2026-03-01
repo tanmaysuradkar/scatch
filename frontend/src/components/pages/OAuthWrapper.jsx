@@ -23,7 +23,7 @@ const OAuthWrapper = () => {
                 localStorage.setItem("token", res.data.token);
                 setIsLoading(false);
                 console.log("user Auth info", res);
-                navigate("/Shop");
+                navigate("/shop");
             })
             .catch(() => {
                 dispatch(setUserAuth())
