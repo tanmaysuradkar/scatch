@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {setUserInfo,clearUserInfo} from '../../redux/features/userInfo'
 const Header = () => {
     const userAuth = useSelector((state)=> state.userInformation.value)
-    console.log(userInfo);
     const dispatch = useDispatch()
 
   const navigate = useNavigate();
