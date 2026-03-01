@@ -34,8 +34,8 @@ router.get("/auth/logout", (req, res, next) => {
 });
 
 
-router.get("/auth/user",isLoggedIn, (req, res) => {
-  res.json({ userInfo: req.user });
+router.get("/auth/user", (req, res) => {
+  res.send(req.user);
 });
 
 module.exports = router;
