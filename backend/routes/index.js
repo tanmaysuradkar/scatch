@@ -19,7 +19,10 @@ router.get(
   }),
   (req, res) => {
     // On success, redirect to frontend OAuth
-    res.redirect(`${process.env.frontentURL}oauth`);
+    const { token, userInfo } = req.user;
+res.redirect(
+  `${process.env.frontentURL}oauth?token=${token}`
+);
   }
 );
 
@@ -31,8 +34,8 @@ router.get("/auth/logout", (req, res, next) => {
 });
 
 
-router.get("/auth/user", (req, res) => {
-  res.send(req.user);
+router.get("/auth/user",isLoggedIn, (req, res) => {
+  res.json({ userInfo: req.user });
 });
 
 module.exports = router;
