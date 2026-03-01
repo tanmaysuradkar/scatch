@@ -35,7 +35,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(cors({
-  origin: `http://localhost:5173`, // my frontend URL
+  origin: `https://scatch-b7il.onrender.com`, // my frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
