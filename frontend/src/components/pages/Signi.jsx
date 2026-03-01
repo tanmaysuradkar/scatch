@@ -99,7 +99,7 @@ export default function CreateAccount() {
   };
 
   const handleSocialLogin = (provider) => {
-    window.open(`${import.meta.env.VITE_backendURL}auth/google`, "_self");
+    window.open(`${import.meta.env.VITE_backendURL}/auth/google`, "_self");
   };
 
   return (
