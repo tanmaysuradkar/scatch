@@ -15,6 +15,7 @@ const OAuthWrapper = () => {
             .get(`${import.meta.env.VITE_backendURL}auth/user`, {
                 withCredentials: true,
             })
+            
             .then(async (res) => {
                 dispatch(setUserInfo( {email:res.data.userInfo.email, fullname: res.data.userInfo.fullname, _id: res.data.userInfo._id}))
                 localStorage.removeItem("token");
