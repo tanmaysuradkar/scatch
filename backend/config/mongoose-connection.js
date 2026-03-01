@@ -6,7 +6,7 @@ if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined in environment variables");
 }
 mongoose
-  .connect(`${MONGODB_URI}/scatch`)
+  .connect(`${MONGODB_URI}`)
   .then(function () {
     dbgr("MongoDB connected");
   })
