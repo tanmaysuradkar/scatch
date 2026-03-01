@@ -2,8 +2,6 @@ import React  from "react";
 import { ArrowRight } from "lucide-react";
 import { useSelector } from 'react-redux'
 const FashionApp = () => {
-  const userInfo = useSelector((state)=> state.userInformation.value)
-  console.log(userInfo);
   return (
     <section className=" !pt-18 relative flex items-center justify-center text-center">
       <div className="lg:h-[97.5vh] md:h-[190vh] h-[120vh] w-[99%] rounded-2xl z-0 overflow-hidden top-2 absolute">
