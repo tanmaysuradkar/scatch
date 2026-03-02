@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport")
+const {isloggedIn} = require("../middlewares/isLoggedIn");
 require("./auth")
 router.get("/", function (req, res) {
     res.send("hey it working")
@@ -34,9 +35,11 @@ router.get("/auth/logout", (req, res, next) => {
 });
 
 
-router.get("/auth/user", (req, res) => {
-  console.log(req)
-  res.send(req.user);
+router.get("/auth/user", isloggedIn, (req, res) => {
+  res.status(200).json({
+    success: true,
+    userInfo: req.user
+  });
 });
 
 module.exports = router;
