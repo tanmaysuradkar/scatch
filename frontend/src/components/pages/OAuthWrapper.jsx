@@ -30,6 +30,7 @@ const OAuthWrapper = () => {
             }
         )
             .then((res) => {
+                console.log("RES User Info  ", res)
                 dispatch(setUserInfo(res.data.userInfo));
                 navigate("/shop");
             })
