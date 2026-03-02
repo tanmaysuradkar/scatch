@@ -35,6 +35,7 @@ router.get("/auth/logout", (req, res, next) => {
 
 
 router.get("/auth/user", (req, res) => {
+  console.log(req)
   res.send(req.user);
 });
 

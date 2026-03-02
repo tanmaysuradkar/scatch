@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUserInfo, clearUserInfo } from '../../redux/features/userInfo'
 const OAuthWrapper = () => {
     const userAuth = useSelector((state) => state.userInformation.value)
-    console.log(userAuth);
+
     const dispatch = useDispatch()
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
@@ -13,7 +13,7 @@ const OAuthWrapper = () => {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
-
+        console.log("Token :- ", token)
         if (!token) {
             navigate("/login");
             return;
