@@ -13,8 +13,8 @@ router.get("/shop", function (req, res) {
   res.send("hey shop it working")
 });
 router.get("/auth/google", (req, res, next) => {
-  req.session.role = req.query.role; // user | owner
-  passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  const role = req.query.role; // user | owner
+  passport.authenticate("google", { scope: ["profile", "email"] ,state: role })(req, res, next);
 });
 // Callback 
 router.get(
@@ -24,7 +24,7 @@ router.get(
     session: true
   }),
   async (req, res) => {
-    const role = req.session.role;
+    const role = req.query.state;
 
     if (!role) {
       console.error("Role missing in session");
