@@ -19,10 +19,13 @@ import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
+import { useNavigate } from "react-router-dom";
+
 
 export default function TShirtProductPage() {
-  const userAuth = useSelector((state)=> state.userInformation.value)
+  const navigate = useNavigate();
+  const userAuth = useSelector((state) => state.userInformation.value)
   console.log(userAuth)
   const [selectedColor, setSelectedColor] = useState("olive");
   const [selectedSize, setSelectedSize] = useState("M");
@@ -32,25 +35,27 @@ export default function TShirtProductPage() {
   const [isZoomed, setIsZoomed] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-  const [showNotification, setShowNotification] = useState("");
+  const [showNotification, setShowNotification] = useState(null);
   const [reviewFilter, setReviewFilter] = useState("latest");
   const [showReviewModal, setShowReviewModal] = useState(false);
   const params = useParams();
-  const [newReview, setNewReview] = useState({  rating: 5, message: "" });
-  const productId = params.productId.split("=")[1];
+  const [newReview, setNewReview] = useState({ rating: 5, message: "" });
   const [reviews, setReviews] = useState([]);
   const [messageOfReview, setMessageOfReview] = useState("Server Erron, try larst")
   const [Product, setProduct] = useState({
     discount: 0,
-    name: "OVERSIZED SWEATSHIRT",
-    price: 320,
-    rating: 4.6,
-    reviews: 4,
-    image: "./img/Banner (4).png",
-    colours: "Yellow",
-    dressStyles: "Casual",
-    genStyles: "kids",
+    name: "",
+    price: 0,
+    rating: 0,
+    reviews: 0,
+    image: "",
+    colours: "",
+    dressStyles: "",
+    genStyles: "",
   });
+
+  // Product ID for URL
+  const productId = params.productId.split("=")[1];
   const colors = [
     { name: "olive", bg: "bg-green-700", label: "Olive Green" },
     { name: "gray", bg: "bg-gray-600", label: "Charcoal Gray" },
@@ -65,16 +70,15 @@ export default function TShirtProductPage() {
   // Show notification
   const showNotificationMessage = (message, type = "success") => {
     setShowNotification({ message, type });
-    setTimeout(() => setShowNotification(""), 3000);
+    setTimeout(() => setShowNotification(null), 3000);
   };
   const handleShowProductDetial = async (e) => {
     try {
-      // Replace with your API endpoint
       const res = await axios.post(
         `${import.meta.env.VITE_backendURL}products/getProductByOne`,
         { productId }
       );
-      console.log(productId);
+      console.log("Product ID for fetch success:- ",productId);
       console.log("Response  =>", res.data.Product);
       setProduct((prev) => ({
         ...prev, // keep old values if API doesn’t return them
@@ -89,7 +93,7 @@ export default function TShirtProductPage() {
         genStyles: res.data.Product.genStyles,
       }));
     } catch (err) {
-      console.log(productId);
+      console.log("Product ID for fetch error:- ",productId);
       console.log(err);
     }
   };
@@ -106,7 +110,6 @@ export default function TShirtProductPage() {
       }
       console.log(res)
     } catch (err) {
-      console.log(productId);
       console.log(err.response);
       setMessageOfReview(err.response.data.message)
     }
@@ -186,7 +189,7 @@ export default function TShirtProductPage() {
       productId: productId,
       rating: newReview.rating,
       message: newReview.message,
-      usernamefull:userAuth.fullname
+      usernamefull: userAuth.fullname
     };
     const response = await axios.post(
       `${import.meta.env.VITE_backendURL}reviews/createReview`,
@@ -207,8 +210,9 @@ export default function TShirtProductPage() {
 
   // Calculate average rating
   const averageRating =
-    reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
-
+    reviews.length > 0
+      ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+      : 0;
   return (
     <div className="max-w-full text-black mx-auto bg-white relative">
       {/* Notification */}
@@ -246,31 +250,6 @@ export default function TShirtProductPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="flex gap-4">
-            {/* Thumbnail Column */}
-            <div className="flex flex-col gap-3">
-              {images.map(
-                (img, index) => (
-                  console.log(img),
-                  (
-                    <div
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`w-20 h-24 bg-gray-100 rounded-lg border-2 ${selectedImage === index
-                        ? "border-black"
-                        : "border-gray-200"
-                        } overflow-hidden cursor-pointer hover:border-gray-400 transition-colors`}
-                    >
-                      <img
-                        src={`../${Product.image}`}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )
-                )
-              )}
-            </div>
-
             {/* Main Image */}
             <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden relative group">
               <div
@@ -279,8 +258,7 @@ export default function TShirtProductPage() {
               >
                 <img
                   src={`../${Product.image}`}
-                  className={`w-64 h-80 ${colors.find((c) => c.name === selectedColor)?.bg
-                    } rounded-lg flex items-center justify-center transition-transform ${isZoomed ? "scale-150" : "scale-100"
+                  className={`w-64 h-80 object-cover transition-transform ${isZoomed ? "scale-150" : "scale-100"
                     }`}
                 />
               </div>

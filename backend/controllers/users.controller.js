@@ -238,6 +238,7 @@ module.exports.deleteOrder = async function (req, res, next) {
     return res.status(500).json({ header: "Something went wrong", message: err.message });
   }
 };
+
 module.exports.getUserProfile = async (req, res) => {
   res.status(200).json({
     message: "User profile fetched successfully",
@@ -254,3 +255,56 @@ module.exports.logoutUser = async (req, res) => {
     blacktoken,
   });
 };
+
+
+module.exports.userInfomation =  async (req, res) => {
+  try {
+    const {
+      fullname,
+      email,
+      state,
+      address,
+      pinCode,
+      addressType,
+      landmark,
+      mobileNumber
+    } = req.body;
+
+    // --- Server-side validation ---
+    const errors = {};
+
+    if (!fullname?.trim()) errors.fullname = 'Full name is required';
+    if (!email?.trim()) errors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) errors.email = 'Invalid email';
+    if (!mobileNumber?.trim()) errors.mobileNumber = 'Mobile number required';
+    else if (!/^\d{10}$/.test(mobileNumber)) errors.mobileNumber = 'Invalid mobile number';
+    if (!address?.trim()) errors.address = 'Address required';
+    if (!pinCode?.trim()) errors.pinCode = 'Pin code required';
+    else if (!/^\d{6}$/.test(pinCode)) errors.pinCode = 'Pin code must be 6 digits';
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ success: false, errors });
+    }
+
+    // --- Save/update in DB ---
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        fullname,
+        email,
+        state,
+        address,
+        pinCode,
+        addressType,
+        landmark,
+        mobileNumber,
+      },
+      { new: true, upsert: true } // upsert: create if doesn't exist
+    ).select('-password'); // don't return password
+      updatedUser.save();
+    res.json({ success: true, data: updatedUser, message: 'Profile updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+}

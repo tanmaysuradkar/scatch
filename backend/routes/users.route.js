@@ -9,7 +9,8 @@ const {
   getUserProfile,
   logoutUser,
   getOrder,
-  deleteOrder
+  deleteOrder,
+  userInfomation
 } = require("../controllers/users.controller");
 const authMiddleware = require("../middlewares/isLoggedIn");
 const { validateRequest } = require("../middlewares/validateRequest");
@@ -54,4 +55,7 @@ router.post("/getOrder", getOrder);
 
 router.get("/logout", authMiddleware.isloggedIn, logoutUser);
 router.post("/profile", authMiddleware.isloggedIn, getUserProfile);
+
+router.post('/userInfomation', authMiddleware.isLoggedIn, userInfomation);
+
 module.exports = router;

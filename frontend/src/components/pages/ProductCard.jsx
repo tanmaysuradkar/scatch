@@ -7,9 +7,6 @@ import { useNavigate } from "react-router-dom";
 
 const EcommerceProductPage = () => {
   const navigate = useNavigate();
-  const [messageOfProduct, setMessageOfProduct] = useState(
-    "Server Erron, try larst"
-  );
   const [selectedFilters, setSelectedFilters] = useState({
     price: 900,
     colors: [],
@@ -192,11 +189,10 @@ const EcommerceProductPage = () => {
                   <button
                     key={index}
                     onClick={() => togglegenStyles(style)}
-                    className={`w-full text-left py-2 px-4 rounded-lg text-sm flex items-center justify-between ${
-                      selectedFilters.genStyles.includes(style)
+                    className={`w-full text-left py-2 px-4 rounded-lg text-sm flex items-center justify-between ${selectedFilters.genStyles.includes(style)
                         ? "bg-black text-white"
                         : "text-gray-600 hover:bg-gray-50 border border-gray-200"
-                    } transition-colors`}
+                      } transition-colors`}
                   >
                     {style}
                     <ChevronDown className="w-3 h-3" />
@@ -262,11 +258,10 @@ const EcommerceProductPage = () => {
                   <button
                     key={index}
                     onClick={() => toggleColor(color.name)}
-                    className={`w-8 h-8 rounded-full ${color.color} border-2 ${
-                      selectedFilters.colors.includes(color.name)
+                    className={`w-8 h-8 rounded-full ${color.color} border-2 ${selectedFilters.colors.includes(color.name)
                         ? "border-gray-800 ring-2 ring-gray-300"
                         : "border-gray-300"
-                    } hover:scale-110 transition-transform`}
+                      } hover:scale-110 transition-transform`}
                   />
                 ))}
               </div>
@@ -306,11 +301,10 @@ const EcommerceProductPage = () => {
                   <button
                     key={index}
                     onClick={() => toggleDressStyle(style)}
-                    className={`w-full text-left py-2 px-4 rounded-lg text-sm flex items-center justify-between ${
-                      selectedFilters.dressStyle.includes(style)
+                    className={`w-full text-left py-2 px-4 rounded-lg text-sm flex items-center justify-between ${selectedFilters.dressStyle.includes(style)
                         ? "bg-black text-white"
                         : "text-gray-600 hover:bg-gray-50 border border-gray-200"
-                    } transition-colors`}
+                      } transition-colors`}
                   >
                     {style}
                     <ChevronDown className="w-3 h-3" />
@@ -343,8 +337,31 @@ const EcommerceProductPage = () => {
         {/* Products Grid */}
 
         {products.length <= 0 && (
-          <div className="flex items-center mb-10 font-bold justify-center text-center w-full">
-            <h1 className="text-black text-5xl">{messageOfProduct}</h1>
+          <div className="flex gap-4 items-center mb-10 font-bold justify-start text-center w-full">
+            <div class="flex flex-row gap-2">
+              <div class="animate-pulse bg-gray-300 w-48 h-48 rounded-lg"></div>
+              <div class="flex flex-col gap-2">
+                <div class="animate-pulse bg-gray-300 w-36 h-10 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-6 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-4 rounded-lg"></div>
+              </div>
+            </div>
+            <div class="flex flex-row gap-2">
+              <div class="animate-pulse bg-gray-300 w-48 h-48 rounded-lg"></div>
+              <div class="flex flex-col gap-2">
+                <div class="animate-pulse bg-gray-300 w-36 h-10 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-6 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-4 rounded-lg"></div>
+              </div>
+            </div>
+            <div class="flex flex-row gap-2">
+              <div class="animate-pulse bg-gray-300 w-48 h-48 rounded-lg"></div>
+              <div class="flex flex-col gap-2">
+                <div class="animate-pulse bg-gray-300 w-36 h-10 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-6 rounded-lg"></div>
+                <div class="animate-pulse bg-gray-300 w-48 h-4 rounded-lg"></div>
+              </div>
+            </div>
           </div>
         )}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 ">

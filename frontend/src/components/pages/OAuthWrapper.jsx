@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch, useSelector } from 'react-redux';
-import { setUserInfo, clearUserInfo } from '../../redux/features/userInfo'
-const OAuthWrapper = () => {
-    const userAuth = useSelector((state) => state.userInformation.value)
+import { useDispatch } from 'react-redux';
+import { setUserInfo, clearUserInfo } from '../../redux/features/userInfo';
 
-    const dispatch = useDispatch()
-    const token = localStorage.getItem("token");
+const OAuthWrapper = () => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
-        console.log("Token :- ", token)
+
         if (!token) {
             navigate("/login");
             return;
@@ -21,35 +20,27 @@ const OAuthWrapper = () => {
 
         localStorage.setItem("token", token);
 
-        axios.get(
-            `${import.meta.env.VITE_backendURL}auth/user`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        )
-            .then((res) => {
-                console.log("RES User Info  ", res)
-                dispatch(setUserInfo(res.data.userInfo));
-                navigate("/shop");
-            })
-            .catch(() => {
-                localStorage.removeItem("token");
-                dispatch(clearUserInfo());
-                navigate("/login");
-            });
+        axios.get(`${import.meta.env.VITE_backendURL}auth/user`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => {
+            dispatch(setUserInfo(res.data.userInfo || res.data));
+            navigate("/shop");
+        })
+        .catch(() => {
+            localStorage.removeItem("token");
+            dispatch(clearUserInfo());
+            navigate("/login");
+        })
+        .finally(() => setIsLoading(false));
+
+        // Remove token from URL
+        window.history.replaceState({}, document.title, "/oauth");
     }, []);
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+    if (isLoading) return <div>Loading...</div>;
 
-    return (
-        <>
-            <div>Not Working Sorry........</div>
-        </>
-    );
+    return <div>Redirecting...</div>;
 };
 
 export default OAuthWrapper;

@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, Save, Eye, EyeOff } from 'lucide-react';
 import Header from '../layout/Header'
 import Footer from '../layout/Footer'
@@ -11,18 +11,35 @@ export default function UserProfile() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-      const userAuth = useSelector((state)=> state.userInformation.value);
-    console.log(userAuth)
+  const userAuth = useSelector((state) => state.userInformation.value);
   const [formData, setFormData] = useState({
-    fullname: userAuth.fullname ||'tanmay suradkar',
+    fullname: '',
     state: '',
     address: '',
-    pinCode: '',
+    pinCode: 0,
     addressType: '',
     landmark: '',
-    mobileNumber: '',
-    email: userAuth.email || '',
+    mobileNumber: 0,
+    email: '',
   });
+
+  // this in work it doce's not complete
+  useEffect(() => {
+    if (userAuth) {
+      console.log(userAuth)
+      setFormData({
+        ...formData,
+        fullname: userAuth.fullname || '',
+        email: userAuth.email || '',
+        state: userAuth.state || '',
+        addressType: userAuth.addressType || '',
+        mobileNumber: userAuth.mobileNumber || 0,
+        landmark: userAuth.landmark || '',
+        pinCode: userAuth.pinCode || 0,
+        address: userAuth.address || '',
+      });
+    }
+  }, [userAuth]);
 
   const [originalData, setOriginalData] = useState({ ...formData });
 
@@ -40,7 +57,7 @@ export default function UserProfile() {
       ...formData,
       [name]: value
     });
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({
@@ -52,33 +69,33 @@ export default function UserProfile() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.fullname.trim()) {
-      newErrors.fullname = 'First name is required';
+      newErrors.fullname = 'Name is required';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    
+
     if (!formData.mobileNumber.trim()) {
       newErrors.mobileNumber = 'Mobile number is required';
     } else if (!/^\+91\s\d{5}\s\d{5}$/.test(formData.mobileNumber)) {
       newErrors.mobileNumber = 'Please enter a valid mobile number (+91 xxxxx xxxxx)';
     }
-    
+
     if (!formData.address.trim()) {
       newErrors.address = 'Address is required';
     }
-    
+
     if (!formData.pinCode.trim()) {
       newErrors.pinCode = 'Pin code is required';
     } else if (!/^\d{6}$/.test(formData.pinCode)) {
       newErrors.pinCode = 'Pin code must be 6 digits';
     }
-    
+
     return newErrors;
   };
 
@@ -87,23 +104,36 @@ export default function UserProfile() {
     setOriginalData({ ...formData });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // optional: client-side validation before sending
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
-    setIsEditing(false);
-    setErrors({});
-    setShowSuccessMessage(true);
-    
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 3000);
-    
-    console.log('Updated profile data:', formData);
+
+    try {
+      const token = localStorage.getItem('token'); // or cookie
+      const res = await axios.post(`${import.meta.env.VITE_backendURL}/users/userInfomation`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data.success) {
+        setIsEditing(false);
+        setErrors({});
+        setShowSuccessMessage(true);
+
+        setTimeout(() => setShowSuccessMessage(false), 3000);
+
+        console.log('Profile saved:', res.data.data);
+      }
+    } catch (err) {
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors); // show server validation errors
+      } else {
+        console.error(err);
+      }
+    }
   };
 
   const handleCancel = () => {
@@ -129,7 +159,7 @@ export default function UserProfile() {
       setFormData({ ...originalData });
       setErrors({});
     }
-    
+
     setActiveSection(sectionId);
     setSidebarOpen(false);
   };
@@ -151,301 +181,293 @@ export default function UserProfile() {
           Profile updated successfully!
         </div>
       )}
-     {/* Navigation */}
+      {/* Navigation */}
       <div className="h-20 w-full border-gray-200 relative bg-white">
         <div className="h-20 w-full flex items-center justify-center">
-         <Header/>
+          <Header />
         </div>
       </div>
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Mobile Menu Button */}
-      <button
-        onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-black text-white p-2 rounded-md"
-      >
-        <Menu size={20} />
-      </button>
-
-      {/* Sidebar */}
-      <div className={`fixed lg:static inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-72 lg:w-80 bg-white shadow-lg z-40`}>
-        {/* Mobile Close Button */}
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Mobile Menu Button */}
         <button
           onClick={toggleSidebar}
-          className="lg:hidden absolute top-4 right-4 text-gray-600"
+          className="lg:hidden fixed top-4 left-4 z-50 bg-black text-white p-2 rounded-md"
         >
-          <X size={20} />
+          <Menu size={20} />
         </button>
 
-        {/* Profile Section */}
-        <div className="p-6 text-center border-b">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 relative group">
-            <img 
-              src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face" 
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <Edit3 size={16} className="text-white" />
-            </div>
-          </div>
-          <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
-            {userAuth.fullname}
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        <div className="py-4 flex-1">
-          {menuItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleSectionChange(item.id)}
-                className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
-                  item.id === activeSection ? 'bg-black text-white hover:bg-gray-800' : 'text-gray-700'
-                }`}
-              >
-                <IconComponent size={18} className="mr-3" />
-                <span className="text-sm">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Logout Button */}
-        <div className="p-4 border-t">
+        {/* Sidebar */}
+        <div className={`fixed lg:static inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out w-72 lg:w-80 bg-white shadow-lg z-40`}>
+          {/* Mobile Close Button */}
           <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+            onClick={toggleSidebar}
+            className="lg:hidden absolute top-4 right-4 text-gray-600"
           >
-            LOGOUT
+            <X size={20} />
           </button>
-        </div>
-      </div>
 
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={toggleSidebar}
-        ></div>
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 p-4 lg:p-8 text-black ml-0">
-        <div className="max-w-4xl mx-auto mt-12 lg:mt-0">
-          <div className="flex justify-between items-center mb-6 lg:mb-8">
-            <div>
-              <h1 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-2">Your Details</h1>
-              <p className="text-gray-600 text-sm">Personal Information</p>
-            </div>
-            {isEditing && (
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
-                >
-                  <Save size={16} className="mr-1" />
-                  Save
-                </button>
+          {/* Profile Section */}
+          <div className="p-6 text-center border-b">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 relative group">
+              <img
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Edit3 size={16} className="text-white" />
               </div>
-            )}
+            </div>
+            <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
+              {userAuth.fullname}
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-4 lg:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 justify-center items-center text-center gap-4 lg:gap-6 mb-4 lg:mb-6">
-              {/* full Name And State*/}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                <input
-                  type="text"
-                  name="fullname"
-                  value={formData.fullname}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.fullname ? 'border-red-500' : 'border-gray-300'}`}
-                  readOnly={!isEditing}
-                />
-                {errors.fullname && <p className="text-red-500 text-xs mt-1">{errors.fullname}</p>}
-              </div>
-               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-                <div className="relative">
-                  <select
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none ${
-                      isEditing ? 'bg-white' : 'bg-gray-50'
-                    } border-gray-300`}
-                    disabled={!isEditing}
-                  >
-                    {states.map(state => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className="mb-4 lg:mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none h-20 lg:h-24 ${
-                  isEditing ? 'bg-white' : 'bg-gray-50'
-                } ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
-                readOnly={!isEditing}
-              />
-              {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-            </div>
-
-            {/* Pin Code, Address Type, Landmark */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Pin Code</label>
-                <input
-                  type="text"
-                  name="pinCode"
-                  value={formData.pinCode}
-                  onChange={handleInputChange}
-                  maxLength="6"
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.pinCode ? 'border-red-500' : 'border-gray-300'}`}
-                  readOnly={!isEditing}
-                />
-                {errors.pinCode && <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address Type</label>
-                <div className="flex items-center space-x-4 mt-3">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="addressType"
-                      value="Home"
-                      checked={formData.addressType === 'Home'}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                      disabled={!isEditing}
-                    />
-                    <span className="text-sm">Home</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="addressType"
-                      value="Work"
-                      checked={formData.addressType === 'Work'}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                      disabled={!isEditing}
-                    />
-                    <span className="text-sm">Work</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="md:col-span-2 xl:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Landmark</label>
-                <input
-                  type="text"
-                  name="landmark"
-                  value={formData.landmark}
-                  onChange={handleInputChange}
-                  placeholder="Optional"
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } border-gray-300`}
-                  readOnly={!isEditing}
-                />
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 lg:mb-6">Contact Information</h3>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
-                <input
-                  type="text"
-                  name="mobileNumber"
-                  value={formData.mobileNumber}
-                  onChange={handleInputChange}
-                  placeholder="+91 xxxxx xxxxx"
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.mobileNumber ? 'border-red-500' : 'border-gray-300'}`}
-                  readOnly={!isEditing}
-                />
-                {errors.mobileNumber && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-                    isEditing ? 'bg-white' : 'bg-gray-50'
-                  } ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                  readOnly={!isEditing}
-                />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-              </div>
-            </div>
-
-            
-
-            {/* Edit Button */}
-            <div className="flex justify-center">
-              {!isEditing ? (
+          {/* Menu Items */}
+          <div className="py-4 flex-1">
+            {menuItems.map((item) => {
+              const IconComponent = item.icon;
+              return (
                 <button
-                  onClick={handleEdit}
-                  className="bg-black text-white py-3 px-8 lg:px-12 rounded-md hover:bg-gray-800 transition-colors font-medium text-sm flex items-center"
+                  key={item.id}
+                  onClick={() => handleSectionChange(item.id)}
+                  className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors ${item.id === activeSection ? 'bg-black text-white hover:bg-gray-800' : 'text-gray-700'
+                    }`}
                 >
-                  <Edit3 size={16} className="mr-2" />
-                  Edit
+                  <IconComponent size={18} className="mr-3" />
+                  <span className="text-sm">{item.label}</span>
                 </button>
-              ) : (
-                <div className="flex space-x-4">
+              );
+            })}
+          </div>
+
+          {/* Logout Button */}
+          <div className="p-4 border-t">
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+            >
+              LOGOUT
+            </button>
+          </div>
+        </div>
+
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={toggleSidebar}
+          ></div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 p-4 lg:p-8 text-black ml-0">
+          <div className="max-w-4xl mx-auto mt-12 lg:mt-0">
+            <div className="flex justify-between items-center mb-6 lg:mb-8">
+              <div>
+                <h1 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-2">Your Details</h1>
+                <p className="text-gray-600 text-sm">Personal Information</p>
+              </div>
+              {isEditing && (
+                <div className="flex space-x-2">
                   <button
                     onClick={handleCancel}
-                    className="bg-gray-500 text-white py-3 px-8 rounded-md hover:bg-gray-600 transition-colors font-medium text-sm"
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
-                    className="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition-colors font-medium text-sm flex items-center"
+                    className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
                   >
-                    <Save size={16} className="mr-2" />
-                    Save Changes
+                    <Save size={16} className="mr-1" />
+                    Save
                   </button>
                 </div>
               )}
             </div>
+
+            <div className="bg-white text-black rounded-lg shadow-sm p-4 lg:p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 justify-center items-center text-center gap-4 lg:gap-6 mb-4 lg:mb-6">
+                {/* full Name And State*/}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input
+                    type="text"
+                    name="fullname"
+                    value={formData.fullname}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      } ${errors.fullname ? 'border-red-500' : 'border-gray-300'}`}
+                    readOnly={!isEditing}
+                  />
+                  {errors.fullname && <p className="text-red-500 text-xs mt-1">{errors.fullname}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                  <div className="relative">
+                    <select
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none ${isEditing ? 'bg-white' : 'bg-gray-50'
+                        } border-gray-300`}
+                      disabled={!isEditing}
+                    >
+                      {states.map(state => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Address */}
+              <div className="mb-4 lg:mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none h-20 lg:h-24 ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    } ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
+                  readOnly={!isEditing}
+                />
+                {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+              </div>
+
+              {/* Pin Code, Address Type, Landmark */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pin Code</label>
+                  <input
+                    type="text"
+                    name="pinCode"
+                    value={formData.pinCode}
+                    onChange={handleInputChange}
+                    maxLength="6"
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      } ${errors.pinCode ? 'border-red-500' : 'border-gray-300'}`}
+                    readOnly={!isEditing}
+                  />
+                  {errors.pinCode && <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Address Type</label>
+                  <div className="flex items-center space-x-4 mt-3">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="addressType"
+                        value="Home"
+                        checked={formData.addressType === 'Home'}
+                        onChange={handleInputChange}
+                        className="mr-2"
+                        disabled={!isEditing}
+                      />
+                      <span className="text-sm">Home</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="addressType"
+                        value="Work"
+                        checked={formData.addressType === 'Work'}
+                        onChange={handleInputChange}
+                        className="mr-2"
+                        disabled={!isEditing}
+                      />
+                      <span className="text-sm">Work</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 xl:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Landmark</label>
+                  <input
+                    type="text"
+                    name="landmark"
+                    value={formData.landmark}
+                    onChange={handleInputChange}
+                    placeholder="Optional"
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      } border-gray-300`}
+                    readOnly={!isEditing}
+                  />
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 lg:mb-6">Contact Information</h3>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+                  <input
+                    type="text"
+                    name="mobileNumber"
+                    value={formData.mobileNumber}
+                    onChange={handleInputChange}
+                    placeholder="+91 xxxxx xxxxx"
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      } ${errors.mobileNumber ? 'border-red-500' : 'border-gray-300'}`}
+                    readOnly={!isEditing}
+                  />
+                  {errors.mobileNumber && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      } ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                    readOnly={!isEditing}
+                  />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                </div>
+              </div>
+
+
+
+              {/* Edit Button */}
+              <div className="flex justify-center">
+                {!isEditing ? (
+                  <button
+                    onClick={handleEdit}
+                    className="bg-black text-white py-3 px-8 lg:px-12 rounded-md hover:bg-gray-800 transition-colors font-medium text-sm flex items-center"
+                  >
+                    <Edit3 size={16} className="mr-2" />
+                    Edit
+                  </button>
+                ) : (
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={handleCancel}
+                      className="bg-gray-500 text-white py-3 px-8 rounded-md hover:bg-gray-600 transition-colors font-medium text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      className="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition-colors font-medium text-sm flex items-center"
+                    >
+                      <Save size={16} className="mr-2" />
+                      Save Changes
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
-    <Footer/>
-   </div>
   );
 }

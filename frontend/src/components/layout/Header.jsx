@@ -35,12 +35,12 @@ const Header = () => {
             <a onClick={()=> navigate("/shop")} className='text-gray-600 text-sm hover:text-black' >
               Product
             </a>
-            <a onClick={()=> navigate("/Product")} className='text-gray-600 text-sm hover:text-black' >
+            {/* <a onClick={()=> navigate("/Product")} className='text-gray-600 text-sm hover:text-black' >
               Categories
             </a>
             <a onClick={()=> navigate("/cart")} className='text-gray-600 text-sm hover:text-black' >
               SALE
-            </a>
+            </a> */}
           </div>
 
           {/* Center Logo */}
@@ -103,15 +103,15 @@ const Header = () => {
             <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
               Product
             </a>
-            <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
+            {/* <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
               Categories
             </a>
             <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
               SALE
-            </a>
+            </a> */}
 
             {/* Mobile Search */}
-            <div className="px-3 pt-2">
+            {/* <div className="px-3 pt-2">
               <div className="relative">
                 <input
                   type="text"
@@ -122,7 +122,7 @@ const Header = () => {
                   <Search className="h-4 w-4" />
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

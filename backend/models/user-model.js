@@ -36,7 +36,7 @@ orderPaymentSchema.pre("save", function (next) {
   if (this.orders && this.orders.length > 0) {
     this.totalAmount = this.orders.reduce(
       (sum, item) => sum + item.product * item.quantity,
-      0
+      0,
     );
   }
   next();
@@ -62,16 +62,31 @@ const userSchema = mongoose.Schema({
     type: [orderPaymentSchema],
     default: [],
   },
-  state: String,
-  contact: Number,
+  state: {
+    type: String,
+    default: "",
+  },
+  contact: {
+    type: String,
+    default: 0,
+  },
   picture: String,
-  address: String,
-  pinCode: Number,
+  address: {
+    type: String,
+    default: "",
+  },
+  pinCode: {
+    type: String,
+    default: 0,
+  },
   addressType: {
     type: Boolean,
     default: false,
   },
-  Landmark: String,
+  Landmark: {
+    type: String,
+    default: "",
+  },
   isVerify: {
     type: Boolean,
     default: false,

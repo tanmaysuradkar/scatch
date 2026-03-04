@@ -31,9 +31,9 @@ const App = () => {
       <Route
         path='/my-account'
         element={
-          <UserProtectWrapper>
+          // <UserProtectWrapper>
             <Profile />
-          </UserProtectWrapper>
+          // </UserProtectWrapper>
         }
       />
 

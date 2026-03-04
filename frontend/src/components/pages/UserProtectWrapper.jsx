@@ -11,7 +11,7 @@ const UserProtectWrapper = ({
     const token = localStorage.getItem('token')
     const navigate = useNavigate()
     const [ isLoading, setIsLoading ] = useState(true)
-    const setUserAuth = setUserAuth;
+    const setUserAuth = setUserInfo;
 
     useEffect(() => {
         if (!token) {
