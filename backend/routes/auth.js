@@ -9,7 +9,6 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const role = profile._json?.role || null; // fallback
         done(null, profile);
       } catch (err) {
         done(err);

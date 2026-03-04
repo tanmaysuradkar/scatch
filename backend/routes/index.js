@@ -19,21 +19,31 @@ router.get("/auth/google", (req, res, next) => {
 // Callback 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: `${process.env.frontentURL}login` }),
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.frontentURL}login`,
+    session: true
+  }),
   async (req, res) => {
     const role = req.session.role;
 
+    if (!role) {
+      console.error("Role missing in session");
+      return res.redirect(`${process.env.frontentURL}login`);
+    }
+
+    let token;
+
     if (role === "user") {
-      const token = await loginOrCreateUser(req.user);
-      return res.redirect(`${process.env.frontentURL}oauth-user?token=${token}`);
+      token = await loginOrCreateUser(req.user);
+    } else if (role === "owner") {
+      token = await loginOrCreateOwner(req.user);
+    } else {
+      return res.redirect(`${process.env.frontentURL}login`);
     }
 
-    if (role === "owner") {
-      const token = await loginOrCreateOwner(req.user);
-      return res.redirect(`${process.env.frontentURL}oauth-owner?token=${token}`);
-    }
-
-    return res.redirect(`${process.env.frontentURL}login`);
+    return res.redirect(
+      `${process.env.frontentURL}oauth-${role}?token=${token}`
+    );
   }
 );
 
