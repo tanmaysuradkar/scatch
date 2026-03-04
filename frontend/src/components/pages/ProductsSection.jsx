@@ -123,11 +123,15 @@ export default function TShirtProductPage() {
   const addToCart = async () => {
     const item = {
       productId,
-      userId: userAuth._id,
       quantity: quantity,
     };
     const response = await axios.post(
-      `${import.meta.env.VITE_backendURL}users/addcart`,
+      `${import.meta.env.VITE_backendURL}users/addcart`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          },
       item
     );
     setCartItems((prev) => [...prev, item]);

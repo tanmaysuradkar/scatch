@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, Save, Eye, EyeOff, Trash2 } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
+import ProductCreate from "./CreateProduct";
 import axios from "axios";
 
 export default function OwenerProfile() {
@@ -15,46 +15,6 @@ export default function OwenerProfile() {
     color: "",
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProductData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-  const colorspick = [
-    { name: 'Green', color: 'bg-green-500' },
-    { name: 'Red', color: 'bg-red-500' },
-    { name: 'Yellow', color: 'bg-yellow-500' },
-    { name: 'Orange', color: 'bg-orange-500' },
-    { name: 'Cyan', color: 'bg-cyan-500' },
-    { name: 'Blue', color: 'bg-blue-600' },
-    { name: 'Purple', color: 'bg-purple-600' },
-    { name: 'Pink', color: 'bg-pink-500' },
-    { name: 'Black', color: 'bg-black' }
-  ];
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_backendURL}products/createProducts`, productData);
-      console.log("Product created:", response.data);
-      // Reset form after successful submission
-      setProductData({
-        image: "",
-        name: "",
-        Categories: "",
-        genStyles: "",
-        price: "",
-        discount: "",
-        color: "",
-      });
-    } catch (error) {
-      console.error("Error creating product:", error);
-    }
-  };
-
-  const categoryOptions = ["Casual", "Formal", "Party", "Gym"];
-  const genStyleOptions = ["Feman", "Man", "kids", "ALL"];
   const [transactions, setTransactions] = useState([]);
   console.log(transactions)
   const [loading, setLoading] = useState(false);
@@ -64,6 +24,18 @@ export default function OwenerProfile() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [editIndex, setEditIndex] = useState(-1);
   const [editValues, setEditValues] = useState({});
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+
+  const [ownerProfile, setOwnerProfile] = useState({
+    fullName: "Owner Name",
+    email: "owner@email.com",
+  });
+
+  const handleAccountChange = (e) => {
+    const { name, value } = e.target;
+    setOwnerProfile((p) => ({ ...p, [name]: value }));
+  };
+
 
   // Statuses should match backend values (capitalize)
   const statuses = ["Pending", "Paid", "Failed", "Refunded"];
@@ -362,154 +334,64 @@ export default function OwenerProfile() {
             )}
 
             {activeTab === "create" && (
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-3">Create Product</h2>
-                <p className="text-gray-600">(Placeholder) Product creation form goes here.</p>
-                <div className="max-w-3xl mx-auto">
-                  <h2 className="text-3xl font-bold text-center mb-8">
-                    Create New Product
-                  </h2>
-                  <form
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded-lg shadow-lg px-8 py-6 space-y-6"
-                  >
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Image URL
-                      </label>
-                      <input
-                        type="text"
-                        name="image"
-                        value={productData.image}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Product Name
-                        </label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={productData.name}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Category
-                        </label>
-                        <select
-                          name="Categories"
-                          value={productData.Categories}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Select Category</option>
-                          {categoryOptions.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Price
-                        </label>
-                        <input
-                          type="number"
-                          name="price"
-                          value={productData.price}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Discount
-                        </label>
-                        <input
-                          type="number"
-                          name="discount"
-                          value={productData.discount}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Gender Style
-                        </label>
-                        <select
-                          name="genStyles"
-                          value={productData.genStyles}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Select Style</option>
-                          {genStyleOptions.map((style) => (
-                            <option key={style} value={style}>
-                              {style}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Color
-                    </label>
-                    <div className="flex items-center gap-3">
-                      {/* Text Input */}
-                      <div className="flex flex-wrap gap-3">
-                        {colorspick.map((colors, index) => (
-                          <div
-                            key={index}
-                            name="color"
-                            value={colors.name}
-                            onClick={handleChange}
-                            className={`w-8 h-8 rounded-full ${colors.color} border-2 ${productData.color.includes(colors.name)
-                                ? 'border-gray-800 ring-2 ring-gray-300'
-                                : 'border-gray-300'
-                              } hover:scale-110 transition-transform`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                      <button
-                        type="submit"
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-                      >
-                        Create Product
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              <ProductCreate />
             )}
 
             {activeTab === "account" && (
-              <div className="p-4">
+              <div className="p-4 ">
                 <h2 className="text-xl font-semibold mb-3">Account</h2>
                 <p className="text-gray-600">Owner account settings and profile information.</p>
+                
+
+                <div className="space-y-5 bg-white p-6 rounded-lg shadow">
+                  {/* Full Name */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Full Name</label>
+                    <input
+                      name="fullName"
+                      value={ownerProfile.fullName}
+                      onChange={handleAccountChange}
+                      disabled={!isEditingAccount}
+                      className="w-full border px-3 py-2 rounded disabled:bg-gray-100"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input
+                      name="email"
+                      value={ownerProfile.email}
+                      disabled
+                      className="w-full border px-3 py-2 rounded bg-gray-100"
+                    />
+                  </div>
+                </div>
+                <div className="w-full p-6 max-w-3xl flex justify-between items-center mb-6">
+                  {!isEditingAccount ? (
+                    <button
+                      onClick={() => setIsEditingAccount(true)}
+                      className="px-4 text-center py-2 bg-black text-white rounded"
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsEditingAccount(false)}
+                        className="px-4 py-2 bg-green-600 text-white rounded"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setIsEditingAccount(false)}
+                        className="px-4 py-2 bg-gray-200 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

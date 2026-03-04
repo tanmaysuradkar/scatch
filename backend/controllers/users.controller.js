@@ -1,7 +1,7 @@
 const userModel = require("../models/user-model");
 const productModel = require("../models/product-model");
 const blacklistTokenaModel = require("../models/blacklistToken-model");
-const { sendEmail } = require("../helper/nodemailer");
+const { sendEmailUser } = require("../helper/nodemailer");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 module.exports.registerUser = async function (req, res) {
@@ -21,7 +21,7 @@ module.exports.registerUser = async function (req, res) {
         fullname,
       });
       const savedUser = await user.save();
-      let mail = await sendEmail({
+      let mail = await sendEmailUser({
         email,
         emailType: "VERIFY",
         user: savedUser,
@@ -60,6 +60,13 @@ module.exports.loginUser = async function (req, res) {
         .json({
           header: "User Unauthorized access.",
           message: "Invalid  or password, Please login again."
+        });
+    }else if(!Owner.isVerify){
+      return res
+        .status(401)
+        .json({
+          header: "Owner not verify the email",
+          message: "First Open Email form tanmaysuradkar2008@gmail.com and verify your account"
         });
     }
 
@@ -107,8 +114,8 @@ module.exports.verify = async function (req, res) {
   }
 };
 module.exports.addOrder = async function (req, res, next) {
-  const { productId, userId, quantity } = req.body;
-
+  const { productId, quantity } = req.body;
+  const userId = req.user._id;
   try {
     //  Step 1: Validate product
     const isProduct = await productModel.findById(productId);
@@ -165,7 +172,7 @@ module.exports.addOrder = async function (req, res, next) {
   }
 };
 module.exports.getOrder = async function (req, res, next) {
-  let { userId } = req.body;
+    const userId = req.user._id;
 
   try {
     let isUser = await userModel.findOne({ _id: userId }).populate({
@@ -194,8 +201,8 @@ module.exports.getOrder = async function (req, res, next) {
   }
 };
 module.exports.deleteOrder = async function (req, res, next) {
-  const { userId, productId } = req.body;
-
+  const { productId } = req.body;
+  const userId = req.user._id;
   try {
     if (!userId || !productId) {
       return res.status(400).json({ message: "Missing userId or productId in request." });
@@ -287,7 +294,7 @@ module.exports.userInfomation =  async (req, res) => {
     }
 
     // --- Save/update in DB ---
-    const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await userModel.findByIdAndUpdate(
       req.user._id,
       {
         fullname,
@@ -301,7 +308,6 @@ module.exports.userInfomation =  async (req, res) => {
       },
       { new: true, upsert: true } // upsert: create if doesn't exist
     ).select('-password'); // don't return password
-      updatedUser.save();
     res.json({ success: true, data: updatedUser, message: 'Profile updated successfully' });
   } catch (err) {
     console.error(err);

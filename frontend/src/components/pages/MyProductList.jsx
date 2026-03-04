@@ -34,7 +34,12 @@ export default function ShoppingCartPage() {
       // Replace with your API endpoint
       const res = await axios.post(
         `${import.meta.env.VITE_backendURL}users/getOrder`,
-        { userId: e }
+        {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
       );
       console.log("jdijad", res);
       if (res.status == 201) {
@@ -76,8 +81,13 @@ export default function ShoppingCartPage() {
       // If user is logged in, request backend to delete the item from DB
       if (userAuth?._id) {
         const res = await axios.post(
-          `${import.meta.env.VITE_backendURL}users/deleteOrder`,
-          { userId: userAuth._id, productId: id }
+          `${import.meta.env.VITE_backendURL}users/deleteOrder`,{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          },
+          { productId: id }
         );
 
         // If backend returns updated cart, use it. Otherwise fall back to local update.

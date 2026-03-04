@@ -16,7 +16,7 @@ const indexRouter = require("./routes/index");
 const paymentRoutes = require("./routes/payment.route");
 
 const db = require("./config/mongoose-connection");
-
+const mongoose = require("mongoose");
 app.use(
   session({
     secret: process.env.EXPRESS_SESSION_SECRET || "tanmayLoveSecret",
@@ -53,7 +53,13 @@ app.use(
 app.use(flash());
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
-
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    memory: process.memoryUsage().rss,
+  });
+})
 app.use("/", indexRouter);
 app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);

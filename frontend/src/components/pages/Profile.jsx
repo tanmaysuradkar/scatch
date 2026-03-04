@@ -105,7 +105,6 @@ export default function UserProfile() {
   };
 
   const handleSave = async () => {
-    // optional: client-side validation before sending
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -113,7 +112,7 @@ export default function UserProfile() {
     }
 
     try {
-      const token = localStorage.getItem('token'); // or cookie
+      const token = localStorage.getItem('token');
       const res = await axios.post(`${import.meta.env.VITE_backendURL}/users/userInfomation`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -166,7 +165,6 @@ export default function UserProfile() {
 
   const menuItems = [
     { id: 'overview', icon: User, label: 'Account Overview', active: true },
-    { id: 'orders', icon: Package, label: 'My Orders', active: false }
   ];
 
   const toggleSidebar = () => {
@@ -223,7 +221,7 @@ export default function UserProfile() {
             </div>
           </div>
 
-          {/* Menu Items */}
+          Menu Items
           <div className="py-4 flex-1">
             {menuItems.map((item) => {
               const IconComponent = item.icon;

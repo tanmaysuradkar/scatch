@@ -47,15 +47,15 @@ router.post("/addcart", [
       .isInt({ min: 1 })
       .withMessage("Quantity must be at least 1"),
   ],
-  validateRequest, addOrder);
+  validateRequest,authMiddleware.isloggedIn, addOrder);
 
-router.post("/deleteOrder", deleteOrder);
+router.post("/deleteOrder",authMiddleware.isloggedIn, deleteOrder);
 
-router.post("/getOrder", getOrder);
+router.post("/getOrder",authMiddleware.isloggedIn, getOrder);
 
 router.get("/logout", authMiddleware.isloggedIn, logoutUser);
 router.post("/profile", authMiddleware.isloggedIn, getUserProfile);
 
-router.post('/userInfomation', authMiddleware.isLoggedIn, userInfomation);
+router.post('/userInfomation', authMiddleware.isloggedIn, userInfomation);
 
 module.exports = router;

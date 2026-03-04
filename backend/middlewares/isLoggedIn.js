@@ -39,7 +39,7 @@ module.exports.authOwer = async (req, res, next) => {
         console.log(decoded._id)
         const Ower = await owerModel.findById(decoded._id);
         console.log(Ower);
-        req.Ower = Ower;
+        req.Owner = Ower;
         next();
     } catch (err) {
         console.error(err);

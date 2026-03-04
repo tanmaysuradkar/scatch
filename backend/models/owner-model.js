@@ -10,6 +10,10 @@ const ownerSchema = mongoose.Schema({
   password: String,
   picture: String,
   gstin: String,
+  isVerify: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 ownerSchema.methods.generateAuthToken = async function() {
