@@ -4,7 +4,13 @@ const owerModel = require("../models/owner-model");
 const blacklistTokenModel = require("../models/blacklistToken-model");
 
 module.exports.isloggedIn = async function (req, res, next) {
- const token = req.headers['authorization']?.split(' ')[1] || req.cookies.token;
+     const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const token = authHeader.split(" ")[1];
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized access.' });
     }
@@ -26,7 +32,13 @@ module.exports.isloggedIn = async function (req, res, next) {
 };
 
 module.exports.authOwer = async (req, res, next) => {
-    const token = req.cookies.token || req.headers['authorization']?.split(' ')[1];
+        const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const token = authHeader.split(" ")[1];
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized access' });
     }
