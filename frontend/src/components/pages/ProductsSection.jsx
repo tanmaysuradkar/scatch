@@ -356,7 +356,7 @@ export default function TShirtProductPage() {
             </div>
 
             {/* Quantity and Add to Cart */}
-            {userAuth && userAuth._id ? (
+            {userAuth._id.length > 0 ? (
               <div className="flex gap-4">
                 <div className="flex items-center border rounded-full">
                   <button
@@ -505,7 +505,7 @@ export default function TShirtProductPage() {
                     <option value="lowest">Lowest Rated</option>
                     <option value="helpful">Most Helpful</option>
                   </select>
-                  {userAuth && userAuth._id ? (
+                  {userAuth._id.length > 0 ? (
                     <button
                       onClick={() => setShowReviewModal(true)}
                       className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"

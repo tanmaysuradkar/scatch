@@ -67,14 +67,14 @@ const Header = () => {
               <Search className="h-5 w-5" />
             </button> */}
 
+            
+            {userAuth._id.length > 0  ? (
+              <>
             {/* Shopping Bag */}
             <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
               <a onClick={()=> navigate("/cart")} className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
             </div>
-            {/* User Account */}
-            {userAuth && userAuth._id ? (
-              <>
-              
+              {/* User Account */}
                <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
                 <a onClick={()=> navigate("/my-account")} className='h-full w-full'>
                   <User className="h-5.5 w-5.5" />
