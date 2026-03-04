@@ -1,4 +1,4 @@
-import React  from "react";
+import React from "react";
 import { ArrowRight } from "lucide-react";
 import { useSelector } from 'react-redux'
 const FashionApp = () => {
@@ -24,7 +24,7 @@ const FashionApp = () => {
                     FIND YOUR
                   </h1>
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                    FASHION{}
+                    FASHION{ }
                   </h1>
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                     BAG TODAY
@@ -83,7 +83,9 @@ const FashionApp = () => {
                 <div className="relative -mt-10">
                   <div className="h-80 flex items-center w-full justify-center gap-2 relative">
                     <div className="h-[90%] overflow-hidden bg-[#32D3AC] w-[39%] rounded-tl-[70px]">
-                        <img
+                      <img
+                        loading="lazy"
+                        onLoad={(e) => e.target.classList.remove("blur-sm")}
                         src="./img/Banner (1).png"
                         className="h-full w-full object-cover"
                         alt=""
@@ -91,6 +93,8 @@ const FashionApp = () => {
                     </div>
                     <div className="h-[90%] bg-gray-400 w-[39%] rounded-tr-[70px]">
                       <img
+                        loading="lazy"
+                        onLoad={(e) => e.target.classList.remove("blur-sm")}
                         src="./img/Hero2.png"
                         className="h-full w-full object-cover"
                         alt=""
@@ -100,6 +104,8 @@ const FashionApp = () => {
                   <div className="h-50 w-50 absolute flex items-center justify-center text-center top-[60%] bg-white left-[50%] [transform:translateX(-50%)] rounded-full ">
                     <div className="h-45 w-45 overflow-hidden rounded-full border-2 border-black ">
                       <img
+                        loading="lazy"
+                        onLoad={(e) => e.target.classList.remove("blur-sm")}
                         src="./img/Hero.png"
                         className="h-full p-3 pl-5 w-full object-cover"
                         alt=""
