@@ -115,6 +115,8 @@ export default function UserProfile() {
       const token = localStorage.getItem('token');
       const res = await axios.post(`${import.meta.env.VITE_backendURL}/users/userInfomation`, formData, {
         headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true
+
       });
 
       if (res.data.success) {

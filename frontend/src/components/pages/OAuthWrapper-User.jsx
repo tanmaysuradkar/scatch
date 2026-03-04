@@ -21,10 +21,12 @@ const OAuthWrapper = () => {
         localStorage.setItem("token", token);
 
         axios.get(`${import.meta.env.VITE_backendURL}auth/user`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true
         })
         .then(res => {
             dispatch(setUserInfo(res.data.userInfo || res.data));
+            window.history.replaceState({}, document.title, "/oauth");
             navigate("/shop");
         })
         .catch(() => {
@@ -33,10 +35,7 @@ const OAuthWrapper = () => {
             navigate("/login");
         })
         .finally(() => setIsLoading(false));
-
-        // Remove token from URL
-        window.history.replaceState({}, document.title, "/oauth");
-    }, []);
+    }, [dispatch, navigate]);
 
     if (isLoading) return <div>Loading...</div>;
 

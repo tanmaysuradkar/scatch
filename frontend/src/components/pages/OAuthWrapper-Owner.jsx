@@ -21,7 +21,8 @@ const OAuthWrapper = () => {
         localStorage.setItem("token", token);
 
         axios.get(`${import.meta.env.VITE_backendURL}auth/owner`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true
         })
         .then(res => {
             dispatch(setOwnerInfo(res.data.ownerInfo || res.data));
