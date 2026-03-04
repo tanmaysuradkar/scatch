@@ -6,7 +6,6 @@ import { setUserInfo, clearUserInfo } from '../../redux/features/userInfo'
 export const UserLogout = () => {
   const navigate = useNavigate();
   const userAuth = useSelector((state) => state.userInformation.value)
-  const setUserAuth = setUserAuth;
   const dispatch = useDispatch()
 
   useEffect(() => {
