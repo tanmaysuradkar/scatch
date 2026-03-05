@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 export default function TShirtProductPage() {
   const navigate = useNavigate();
   const userAuth = useSelector((state) => state.userInformation.value)
-  console.log(userAuth)
+  const isLoggedIn = Boolean(userAuth?._id);
   const [selectedColor, setSelectedColor] = useState("olive");
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -356,7 +356,7 @@ export default function TShirtProductPage() {
             </div>
 
             {/* Quantity and Add to Cart */}
-            {!(userAuth._id.length > 0 )? (
+            {isLoggedIn? (
               <div className="flex gap-4">
                 <div className="flex items-center border rounded-full">
                   <button
@@ -505,7 +505,7 @@ export default function TShirtProductPage() {
                     <option value="lowest">Lowest Rated</option>
                     <option value="helpful">Most Helpful</option>
                   </select>
-                  {!(userAuth._id.length > 0) ? (
+                  {isLoggedIn ? (
                     <button
                       onClick={() => setShowReviewModal(true)}
                       className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"

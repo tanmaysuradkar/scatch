@@ -6,7 +6,7 @@ import {setUserInfo,clearUserInfo} from '../../redux/features/userInfo'
 const Header = () => {
     const userAuth = useSelector((state)=> state.userInformation.value)
     const dispatch = useDispatch()
-
+const isLoggedIn = Boolean(userAuth?._id);
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
@@ -68,7 +68,7 @@ const Header = () => {
             </button> */}
 
             
-            {!(userAuth._id.length > 0)  ? (
+            {isLoggedIn ? (
               <>
             {/* Shopping Bag */}
             <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
