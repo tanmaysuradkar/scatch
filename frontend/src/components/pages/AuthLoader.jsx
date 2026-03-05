@@ -10,6 +10,7 @@ const AuthLoader = ({ children }) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
+      console.log("Auth load token is not, Auth clear ")
       dispatch(clearUserInfo());
       return;
     }

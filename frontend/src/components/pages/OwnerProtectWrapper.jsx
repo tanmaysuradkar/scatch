@@ -15,7 +15,7 @@ const OwnerProtectWrapper = ({
 
     useEffect(() => {
         if (!token) {
-            navigate('/login')
+            navigate('/login-owner')
         }
         console.log(token,"token of Account")
         axios.post(`${import.meta.env.VITE_backendURL}owner/profile`,{}, {

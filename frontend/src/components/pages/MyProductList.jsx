@@ -6,6 +6,7 @@ import axios from "axios";
 import { useSelector } from 'react-redux'
 import { useNavigate } from "react-router-dom";
 export default function ShoppingCartPage() {
+  const token = localStorage.getItem('token')
   const navigate = useNavigate();
   const userAuth = useSelector((state)=> state.userInformation.value)
   console.log(userAuth);

@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom'
 
 import Signi from './components/pages/Signi'
 import Login from './components/pages/Login'
+import LoginOwner from './components/pages/LoginOwner'
 import Home from './components/pages/Home'
 import ProductCard from './components/pages/ProductCard'
 import ProductsSection from './components/pages/ProductsSection'
@@ -28,6 +29,7 @@ const App = () => {
       <Route path='/signup' element={<Signi />} />
       <Route path='/signup-owner' element={<OwnerSignup />} />
       <Route path='/login' element={<Login />} />
+      <Route path='/login-owner' element={<LoginOwner />} />
       <Route path='/logout' element={<UserLogout />} />
       <Route path='/oauth-user' element={<OAuthWrapperUser />} />
       <Route path='/oauth-owner' element={<OAuthWrapperOwner />} />

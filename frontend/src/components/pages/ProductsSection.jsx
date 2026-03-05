@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 
 export default function TShirtProductPage() {
+  const token = localStorage.getItem('token')
   const navigate = useNavigate();
   const userAuth = useSelector((state) => state.userInformation.value)
   const isLoggedIn = Boolean(userAuth?._id);

@@ -11,18 +11,20 @@ module.exports.createReview = async function (req, res) {
     // Validate user existence
     const isUser = await userModel.findOne({ _id: username });
     if (!isUser) {
-      return res.status(401).json({
+      return res.status(404).json({
         message: "User not found",
       });
     }
 
-    // Validate product existence
-    const isProduct = await productModel.findOne({ _id: productId });
-    if (!isProduct) {
-      return res.status(401).json({
-        message: "Product not found",
-      });
-    }
+    const allReviews = await reviewsModel.find({ product: productId });
+    
+    const avgRating =
+    allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length;
+    
+    await productModel.findByIdAndUpdate(productId, {
+      rating: avgRating,
+      reviews: allReviews.length,
+    });
 
     // Create review 
     const review = await reviewsModel.create({
@@ -58,7 +60,7 @@ module.exports.deleteReview = async function (req, res) {
     const { reviewId, username } = req.body;
 
     if (!reviewId || !username) {
-      return res.status(400).json({ message: "reviewId and username are required" });
+      return res.status(404).json({ message: "reviewId and username are required" });
     }
 
     // Verify user exists
@@ -97,9 +99,9 @@ module.exports.getReview = async function (req, res) {
     }
     console.log(reviews);
     if (!reviews || reviews.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "No Review found",
-        review: reviews,
+        review: reviews || [],
       });
     }
     res.status(200).json({

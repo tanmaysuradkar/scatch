@@ -16,30 +16,29 @@ export default function UserProfile() {
     fullname: '',
     state: '',
     address: '',
-    pinCode: 0,
+    pinCode: "",
     addressType: '',
     landmark: '',
-    mobileNumber: 0,
+    mobileNumber: "",
     email: '',
   });
 
   // this in work it doce's not complete
-  useEffect(() => {
-    if (userAuth) {
-      console.log(userAuth)
-      setFormData({
-        ...formData,
-        fullname: userAuth.fullname || '',
-        email: userAuth.email || '',
-        state: userAuth.state || '',
-        addressType: userAuth.addressType || '',
-        mobileNumber: userAuth.mobileNumber || 0,
-        landmark: userAuth.landmark || '',
-        pinCode: userAuth.pinCode || 0,
-        address: userAuth.address || '',
-      });
-    }
-  }, [userAuth]);
+useEffect(() => {
+  if (userAuth) {
+    setFormData({
+      fullname: userAuth.fullname || '',
+      email: userAuth.email || '',
+      state: userAuth.state || '',
+      addressType: userAuth.addressType || '',
+      mobileNumber: userAuth.mobileNumber || '',
+      landmark: userAuth.landmark || '',
+      pinCode: userAuth.pinCode || '',
+      address: userAuth.address || '',
+    });
+  }
+}, [userAuth]);
+  
 
   const [originalData, setOriginalData] = useState({ ...formData });
 
