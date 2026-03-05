@@ -261,7 +261,7 @@ export default function TShirtProductPage() {
                 onClick={() => setIsZoomed(!isZoomed)}
               >
                 <img
-                  src={`../${Product.image}`}
+                  src={`${Product.image}`}
                   className={`w-64 h-80 object-cover transition-transform ${isZoomed ? "scale-150" : "scale-100"
                     }`}
                 />
