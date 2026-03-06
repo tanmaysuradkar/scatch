@@ -68,7 +68,7 @@ const isLoggedIn = Boolean(userAuth?._id);
             </button> */}
 
             
-            {isLoggedIn ? (
+            {!isLoggedIn ? (
               <>
             {/* Shopping Bag */}
             <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
