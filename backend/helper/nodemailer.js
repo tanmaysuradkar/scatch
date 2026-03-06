@@ -57,7 +57,7 @@ module.exports.sendEmailOwner = async ({ email, emailType, owner }) => {
             host: "sandbox.smtp.mailtrap.io",
             port: 2525,
             auth: {
-              owner: "4d3fdd70a950fe",
+              user: "4d3fdd70a950fe",
               pass: "81ce72804460a9"
             }
         });
