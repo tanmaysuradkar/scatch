@@ -357,7 +357,7 @@ export default function TShirtProductPage() {
             </div>
 
             {/* Quantity and Add to Cart */}
-            {isLoggedIn? (
+            {!isLoggedIn? (
               <div className="flex gap-4">
                 <div className="flex items-center border rounded-full">
                   <button
@@ -506,7 +506,7 @@ export default function TShirtProductPage() {
                     <option value="lowest">Lowest Rated</option>
                     <option value="helpful">Most Helpful</option>
                   </select>
-                  {isLoggedIn ? (
+                  {!isLoggedIn ? (
                     <button
                       onClick={() => setShowReviewModal(true)}
                       className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
