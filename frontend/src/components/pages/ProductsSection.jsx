@@ -120,24 +120,27 @@ export default function TShirtProductPage() {
     handleShowProductReviewAll();
   }, [productId]);
 
-  // Add to cart functionality
-  const addToCart = async () => {
-    const item = {
-      productId,
-      quantity: quantity,
-    };
-    const response = await axios.post(
-      `${import.meta.env.VITE_backendURL}users/addcart`,{
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            withCredentials: true,
-          },
-      item
-    );
-    setCartItems((prev) => [...prev, item]);
-    showNotificationMessage(`Added ${quantity} item(s) to cart!`);
+// Add to cart functionality
+const addToCart = async () => {
+  const item = {
+    productId,
+    quantity: quantity,
   };
+
+  const response = await axios.post(
+    `${import.meta.env.VITE_backendURL}users/addcart`,
+    item, // data
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    } // config
+  );
+
+  setCartItems((prev) => [...prev, item]);
+  showNotificationMessage(`Added ${quantity} item(s) to cart!`);
+};
 
   // Add to favorites
   const toggleFavorite = () => {

@@ -20,19 +20,19 @@ const isLoggedIn = Boolean(userAuth?._id);
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
             >
               {isMobileMenuOpen ? (
-                <X className="block h-5 w-5" />
+                <X className="block cursor-pointer h-5 w-5" />
               ) : (
-                <Menu className="block h-5 w-5" />
+                <Menu className="block cursor-pointer h-5 w-5" />
               )}
             </button>
           </div>
 
           {/* Left Navigation - Desktop */}
           <div className="hidden md:flex  items-center space-x-6 lg:space-x-8">
-            <a onClick={()=> navigate("/")} className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/")} className='text-gray-600 cursor-pointer text-sm hover:text-black' >
               Home
             </a>
-            <a onClick={()=> navigate("/shop")} className='text-gray-600 text-sm hover:text-black' >
+            <a onClick={()=> navigate("/shop")} className='text-gray-600 cursor-pointer text-sm hover:text-black' >
               Product
             </a>
             {/* <a onClick={()=> navigate("/Product")} className='text-gray-600 text-sm hover:text-black' >
@@ -44,14 +44,16 @@ const isLoggedIn = Boolean(userAuth?._id);
           </div>
 
           {/* Center Logo */}
-          <div className="flex-1 flex justify-center md:flex-none">
-            <h1 className="text-2xl text-black font-bold">SCRATCH</h1>
+          <div className="flex-1 cursor-pointer flex justify-center md:flex-none">
+            <h1 onClick={()=>{
+              navigate("/");
+            }} className="text-2xl text-black font-bold">SCRATCH</h1>
           </div>
 
           {/* Right Icons */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Search - Desktop */}
-            <div className="hidden sm:block relative">
+            {/* <div className="hidden sm:block relative">
               <input
                 type="text"
                 placeholder="Search Bag"
@@ -60,7 +62,7 @@ const isLoggedIn = Boolean(userAuth?._id);
               <div className="p-1 absolute right-2.5 top-1/2  transform -translate-y-1/2  !text-black hover:bg-gray-100 rounded-md transition-colors duration-200">
                 <Search className='h-4 w-4' />
               </div>
-            </div>
+            </div> */}
 
             {/* Search Icon - Mobile
             <button className="sm:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
@@ -71,22 +73,22 @@ const isLoggedIn = Boolean(userAuth?._id);
             {!isLoggedIn ? (
               <>
             {/* Shopping Bag */}
-            <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-              <a onClick={()=> navigate("/cart")} className='h-full w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
+            <div className="p-2 text-gray-600  hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
+              <a onClick={()=> navigate("/cart")} className='h-full cursor-pointer w-full' ><ShoppingBag className="h-5.5 w-5.5" /></a>
             </div>
               {/* User Account */}
                <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-                <a onClick={()=> navigate("/my-account")} className='h-full w-full'>
+                <a onClick={()=> navigate("/my-account")} className='h-full cursor-pointer w-full'>
                   <User className="h-5.5 w-5.5" />
                 </a>
               </div>
               <div className="text-center">
-                <a onClick={()=> navigate("/logout")} className='flex-1  bg-black text-white py-1 px-2 rounded-full hover:bg-gray-800 transition-colors font-medium' >Logout</a>
+                <a onClick={()=> navigate("/logout")} className='flex-1 cursor-pointer  bg-black text-white py-1 px-2 rounded-full hover:bg-gray-800 transition-colors font-medium' >Logout</a>
               </div>
               </>
             ) : (
              <div className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200">
-                <a onClick={()=> navigate("/signup")} className='h-full w-full'>
+                <a onClick={()=> navigate("/signup")} className='h-full cursor-pointer w-full'>
                   <User className="h-5.5 w-5.5" />
                 </a>
               </div>
@@ -97,10 +99,10 @@ const isLoggedIn = Boolean(userAuth?._id);
         {/* Mobile Menu */}
         <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
           <div className="px-2 pt-2 pb-4 space-y-1 bg-white border-t border-gray-100">
-            <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-40 rounded-md transition-colors duration-200">
+            <a onClick={()=> navigate("/")} className="block cursor-pointer px-3 py-3 text-base font-normal cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-40 rounded-md transition-colors duration-200">
               Home
             </a>
-            <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
+            <a onClick={()=> navigate("/shop")} className="block cursor-pointer px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">
               Product
             </a>
             {/* <a href="#" className="block px-3 py-3 text-base font-normal text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200">

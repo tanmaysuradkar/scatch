@@ -213,9 +213,6 @@ useEffect(() => {
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <Edit3 size={16} className="text-white" />
-              </div>
             </div>
             <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
               {userAuth.fullname}
