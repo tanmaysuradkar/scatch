@@ -3,7 +3,7 @@ import { User, Package, MapPin, Wallet, Calendar, ChevronDown, Menu, X, Edit3, S
 import Header from '../layout/Header'
 import Footer from '../layout/Footer'
 import { useSelector } from 'react-redux'
-
+import axios from "axios";
 export default function UserProfile() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -104,38 +104,41 @@ useEffect(() => {
     setOriginalData({ ...formData });
   };
 
-  const handleSave = async () => {
-    const newErrors = validateForm();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+  const [loading,setLoading] = useState(false)
 
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${import.meta.env.VITE_backendURL}/users/userInfomation`, formData, {
+const handleSave = async () => {
+  const newErrors = validateForm();
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  try {
+    setLoading(true)
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_backendURL}users/userInfomation`,
+      formData,
+      {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
-
-      });
-
-      if (res.data.success) {
-        setIsEditing(false);
-        setErrors({});
-        setShowSuccessMessage(true);
-
-        setTimeout(() => setShowSuccessMessage(false), 3000);
-
-        console.log('Profile saved:', res.data.data);
       }
-    } catch (err) {
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors); // show server validation errors
-      } else {
-        console.error(err);
-      }
+    );
+
+    if (res.data.success) {
+      setIsEditing(false);
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false)
+  }
+};
 
   const handleCancel = () => {
     setFormData({ ...originalData });
@@ -210,17 +213,17 @@ useEffect(() => {
           <div className="p-6 text-center border-b">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 relative group">
               <img
-                src={`${userAuth.picture}`}
+                src={userAuth?.picture || "/default-avatar.png"}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
-              {userAuth.fullname}
+              {userAuth?.fullname}
             </div>
           </div>
 
-          Menu Items
+          {/* Menu Items */}
           <div className="py-4 flex-1">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
