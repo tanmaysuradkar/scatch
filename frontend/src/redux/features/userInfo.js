@@ -13,6 +13,7 @@ export const userInfo = createSlice({
       addressType: "",
       landmark: "",
       mobileNumber: "",
+      picture:"",
     },
   },
   reducers: {
@@ -20,7 +21,7 @@ export const userInfo = createSlice({
       state.value = actions.payload;
     },
     clearUserInfo: (state) => {
-      state.value = { email: " ", fullname: " ", _id: " ", state: " ", address: " ", pinCode: " ", addressType: " ", landmark: " ", mobileNumber: " ", };
+      state.value = { email: " ", fullname: " ", _id: " ", state: " ", address: " ", pinCode: " ", addressType: " ", landmark: " ", mobileNumber: " ",picture:"" };
     },
   },
 });
