@@ -15,6 +15,7 @@ export default function UserProfile() {
   const [formData, setFormData] = useState({
     fullname: '',
     state: '',
+    picture:'',
     address: '',
     pinCode: "",
     addressType: '',
@@ -209,7 +210,7 @@ useEffect(() => {
           <div className="p-6 text-center border-b">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 relative group">
               <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                src={picture}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
