@@ -4,9 +4,10 @@ const blacklistTokenaModel = require("../models/blacklistToken-model");
 const { sendEmailUser } = require("../helper/nodemailer");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+ 
 module.exports.registerUser = async function (req, res) {
   try {
-    let { email,password, fullname } = req.body;
+    let { email, password, fullname } = req.body;
     let useris = await userModel.findOne({ email: email });
     if (useris) {
       return res.status(409).json({
@@ -37,56 +38,63 @@ module.exports.registerUser = async function (req, res) {
     }
   } catch (err) {
     console.log("Err ", err);
-    res.status(400).json({
-      tanmay: "tanmay start",
+    res.status(500).json({
+      message: "Server error during registration",
     });
   }
 };
+ 
 module.exports.loginUser = async function (req, res) {
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email });
+    
     if (!user) {
       return res.status(401).json({
         header: "User Unauthorized access.",
         message: "Invalid email or password, Please login again.",
       });
     }
+    
     const result = await user.comparePassword(password);
-    console.log(result)
+    console.log("Password match result:", result);
+    
     if (!result) {
-      return res
-        .status(401)
-        .json({
-          header: "User Unauthorized access.",
-          message: "Invalid  or password, Please login again."
-        });
-    }else if(!Owner.isVerify){
-      return res
-        .status(401)
-        .json({
-          header: "Owner not verify the email",
-          message: "First Open Email form tanmaysuradkar2008@gmail.com and verify your account"
-        });
+      return res.status(401).json({
+        header: "User Unauthorized access.",
+        message: "Invalid email or password, Please login again.",
+      });
     }
-
+ 
+    // ✅ FIX: Check isVerify on the correct user object
+    if (!user.isVerify) {
+      return res.status(401).json({
+        header: "Email not verified",
+        message: "Please verify your email before login. Check your inbox.",
+      });
+    }
+ 
     const token = user.generateAuthToken();
     res.cookie("token", token, { httpOnly: true, secure: true });
-
-    res.status(201).json({
+ 
+    res.status(200).json({
       message: "Login successful ✅",
       user: {
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
       },
-      token
+      token,
     });
   } catch (err) {
     console.log("Error logging in:", err);
-    res.status(500).json({header: "Internal server error.",message: "server error, Please login again." });
+    res.status(500).json({
+      header: "Internal server error.",
+      message: "Server error, Please login again.",
+    });
   }
 };
+ 
 module.exports.verify = async function (req, res) {
   try {
     const { token } = req.body;
@@ -95,29 +103,31 @@ module.exports.verify = async function (req, res) {
     const isUser = await userModel.findOneAndUpdate(
       { _id: istoken },
       { $set: { isVerify: true } },
-      { new: true } // Returns the updated document
+      { new: true }
     );
     if (isUser) {
       res.status(201).json({
-        message: "user VERFY successfully",
+        message: "user verified successfully",
         isUser,
         token,
       });
     } else {
-      res.status(401).json({ message: "incorrent Verify" });
+      res.status(401).json({ message: "incorrect verification" });
     }
   } catch (error) {
     console.log("Err ", error);
     res.status(400).json({
-      message: "server side verify route",
+      message: "server side verify route error",
     });
   }
 };
+ 
 module.exports.addOrder = async function (req, res, next) {
   const { productId, quantity } = req.body;
   const userId = req.user._id;
+  
   try {
-    //  Step 1: Validate product
+    // Step 1: Validate product
     const isProduct = await productModel.findById(productId);
     if (!isProduct) {
       return res.status(404).json({
@@ -125,8 +135,8 @@ module.exports.addOrder = async function (req, res, next) {
         message: "Please try again with a valid product ID.",
       });
     }
-
-    //  Step 2: Validate user
+ 
+    // Step 2: Validate user
     const isUser = await userModel.findById(userId);
     if (!isUser) {
       return res.status(404).json({
@@ -134,14 +144,13 @@ module.exports.addOrder = async function (req, res, next) {
         message: "Invalid user. Please login again.",
       });
     }
-
-    //  Step 3: Check if product already exists in user's orders
+ 
+    // Step 3: Check if product already exists in user's orders
     const existingOrder = isUser.orders.find(
       (o) => o.product.toString() === productId
     );
-
+ 
     if (existingOrder) {
-      // If already in cart, update quantity instead of pushing again
       existingOrder.quantity += Number(quantity);
     } else {
       isUser.orders.push({
@@ -149,122 +158,156 @@ module.exports.addOrder = async function (req, res, next) {
         quantity: Number(quantity),
       });
     }
-
+ 
     await isUser.save();
-
+ 
     // Step 4: Populate and respond
     const populatedUser = await userModel
       .findById(userId)
       .populate("orders.product")
       .select("-password");
-
+ 
     res.status(201).json({
       header: "Order added successfully 👍🏻",
       message: "User order list updated successfully!",
       orders: populatedUser.orders,
     });
   } catch (err) {
-    console.error(" Error adding order:", err);
+    console.error("Error adding order:", err);
     res.status(500).json({
       header: "Something went wrong ",
       message: err.message,
     });
   }
 };
+ 
 module.exports.getOrder = async function (req, res, next) {
-    const userId = req.user._id;
-
+  const userId = req.user._id;
+ 
   try {
     let isUser = await userModel.findOne({ _id: userId }).populate({
       path: "orders.product",
       model: "product",
     });
+ 
     if (!isUser) {
-      res.status(401).json({ message: "Unauthorized access." });
+      return res.status(401).json({ 
+        message: "Unauthorized access." 
+      });
     }
+ 
     if (!isUser.orders || isUser.orders.length === 0) {
       return res.status(200).json({
         message: "No cart found 🛒",
         cart: [],
       });
     }
-    res.status(201).json({
+ 
+    res.status(200).json({
       message: "User cart fetched successfully",
       cart: isUser.orders,
     });
   } catch (err) {
-    console.log(err);
-    res.status(401).json({
+    console.log("Get order error:", err);
+    res.status(500).json({
       header: "User not allow",
-      message: "",
+      message: "Error fetching cart",
     });
   }
 };
+ 
 module.exports.deleteOrder = async function (req, res, next) {
   const { productId } = req.body;
   const userId = req.user._id;
+  
   try {
     if (!userId || !productId) {
-      return res.status(400).json({ message: "Missing userId or productId in request." });
+      return res.status(400).json({ 
+        message: "Missing userId or productId in request." 
+      });
     }
-
+ 
     const isUser = await userModel.findById(userId).populate("orders.product");
     if (!isUser) {
-      return res.status(401).json({ message: "Unauthorized access." });
+      return res.status(401).json({ 
+        message: "Unauthorized access." 
+      });
     }
-
+ 
     if (!isUser.orders || isUser.orders.length === 0) {
-      return res.status(200).json({ message: "No cart found 🛒", cart: [] });
+      return res.status(200).json({ 
+        message: "No cart found 🛒", 
+        cart: [] 
+      });
     }
-
-    // Find the index of the order entry matching the given productId
+ 
     const orderIndex = isUser.orders.findIndex((o) => {
-      // o.product may be populated (object) or just an id
       const pid = o.product && o.product._id ? o.product._id.toString() : o.product?.toString();
       return pid === productId;
     });
-
+ 
     if (orderIndex === -1) {
-      return res.status(404).json({ message: "Product not found in cart." });
+      return res.status(404).json({ 
+        message: "Product not found in cart." 
+      });
     }
-
-    // Remove single entry from orders array
+ 
     isUser.orders.splice(orderIndex, 1);
-
     await isUser.save();
-
-    // Re-populate to ensure product details are present in response
-    const populatedUser = await userModel.findById(userId).populate("orders.product").select("-password");
-
+ 
+    const populatedUser = await userModel
+      .findById(userId)
+      .populate("orders.product")
+      .select("-password");
+ 
     return res.status(200).json({
       message: "Product removed from cart successfully",
       cart: populatedUser.orders,
     });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ header: "Something went wrong", message: err.message });
+    console.error("Delete order error:", err);
+    return res.status(500).json({ 
+      header: "Something went wrong", 
+      message: err.message 
+    });
   }
 };
-
+ 
 module.exports.getUserProfile = async (req, res) => {
-  res.status(200).json({
-    message: "User profile fetched successfully",
-    user: req.user,
-  });
+  try {
+    res.status(200).json({
+      message: "User profile fetched successfully",
+      user: req.user,
+    });
+  } catch (err) {
+    console.error("Profile fetch error:", err);
+    res.status(500).json({
+      message: "Error fetching profile",
+    });
+  }
 };
+ 
 module.exports.logoutUser = async (req, res) => {
-  res.clearCookie("token");
-  const token =
-    req.cookies.token || req.headers["authorization"]?.split(" ")[1];
-  let blacktoken = await blacklistTokenaModel.create({ token });
-  res.status(200).json({
-    message: "User logged out successfully",
-    blacktoken,
-  });
+  try {
+    res.clearCookie("token");
+    const token = req.cookies.token || req.headers["authorization"]?.split(" ")[1];
+    
+    if (token) {
+      let blacktoken = await blacklistTokenaModel.create({ token });
+    }
+ 
+    res.status(200).json({
+      message: "User logged out successfully",
+    });
+  } catch (err) {
+    console.error("Logout error:", err);
+    res.status(500).json({
+      message: "Error logging out",
+    });
+  }
 };
-
-
-module.exports.userInfomation =  async (req, res) => {
+ 
+module.exports.userInfomation = async (req, res) => {
   try {
     const {
       fullname,
@@ -274,12 +317,12 @@ module.exports.userInfomation =  async (req, res) => {
       pinCode,
       addressType,
       landmark,
-      mobileNumber
+      mobileNumber,
     } = req.body;
-
-    // --- Server-side validation ---
+ 
+    // Server-side validation
     const errors = {};
-
+ 
     if (!fullname?.trim()) errors.fullname = 'Full name is required';
     if (!email?.trim()) errors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(email)) errors.email = 'Invalid email';
@@ -288,12 +331,11 @@ module.exports.userInfomation =  async (req, res) => {
     if (!address?.trim()) errors.address = 'Address required';
     if (!pinCode?.trim()) errors.pinCode = 'Pin code required';
     else if (!/^\d{6}$/.test(pinCode)) errors.pinCode = 'Pin code must be 6 digits';
-
+ 
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({ success: false, errors });
     }
-
-    // --- Save/update in DB ---
+ 
     const updatedUser = await userModel.findByIdAndUpdate(
       req.user._id,
       {
@@ -306,11 +348,20 @@ module.exports.userInfomation =  async (req, res) => {
         landmark,
         mobileNumber,
       },
-      { new: true, upsert: true } // upsert: create if doesn't exist
-    ).select('-password'); // don't return password
-    res.json({ success: true, data: updatedUser, message: 'Profile updated successfully' });
+      { new: true }
+    ).select('-password');
+ 
+    res.status(200).json({ 
+      success: true, 
+      data: updatedUser, 
+      message: 'Profile updated successfully' 
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("User info update error:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error' 
+    });
   }
-}
+};
+ 

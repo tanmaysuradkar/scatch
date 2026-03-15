@@ -21,8 +21,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-
-
+ 
+ 
 export default function TShirtProductPage() {
   const token = localStorage.getItem('token')
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export default function TShirtProductPage() {
   const params = useParams();
   const [newReview, setNewReview] = useState({ rating: 5, message: "" });
   const [reviews, setReviews] = useState([]);
-  const [messageOfReview, setMessageOfReview] = useState("Server Erron, try larst")
+  const [messageOfReview, setMessageOfReview] = useState("Server Error, try later")
   const [Product, setProduct] = useState({
     discount: 0,
     name: "",
@@ -54,7 +54,7 @@ export default function TShirtProductPage() {
     dressStyles: "",
     genStyles: "",
   });
-
+ 
   // Product ID for URL
   const productId = params.productId.split("=")[1];
   const colors = [
@@ -68,21 +68,23 @@ export default function TShirtProductPage() {
     { icon: RotateCcw, message: "30-day return policy" },
     { icon: Shield, message: "2-year warranty included" },
   ];
+  
   // Show notification
   const showNotificationMessage = (message, type = "success") => {
     setShowNotification({ message, type });
     setTimeout(() => setShowNotification(null), 3000);
   };
+  
   const handleShowProductDetial = async (e) => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_backendURL}products/getProductByOne`,
         { productId }
       );
-      console.log("Product ID for fetch success:- ",productId);
+      console.log("Product ID for fetch success:- ", productId);
       console.log("Response  =>", res.data.Product);
       setProduct((prev) => ({
-        ...prev, // keep old values if API doesn’t return them
+        ...prev,
         discount: res.data.Product.discount,
         name: res.data.Product.name,
         price: res.data.Product.price,
@@ -94,10 +96,11 @@ export default function TShirtProductPage() {
         genStyles: res.data.Product.genStyles,
       }));
     } catch (err) {
-      console.log("Product ID for fetch error:- ",productId);
+      console.log("Product ID for fetch error:- ", productId);
       console.log(err);
     }
   };
+  
   const handleShowProductReviewAll = async (e) => {
     try {
       const res = await axios.post(
@@ -115,33 +118,45 @@ export default function TShirtProductPage() {
       setMessageOfReview(err.response.data.message)
     }
   };
+  
   useEffect(() => {
     handleShowProductDetial();
     handleShowProductReviewAll();
   }, [productId]);
-
-// Add to cart functionality
-const addToCart = async () => {
-  const item = {
-    productId,
-    quantity: quantity,
+ 
+  // Add to cart functionality
+  const addToCart = async () => {
+    if (!isLoggedIn) {
+      showNotificationMessage("Please login to add items to cart", "error");
+      navigate("/login");
+      return;
+    }
+ 
+    const item = {
+      productId,
+      quantity: quantity,
+    };
+ 
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_backendURL}users/addcart`,
+        item,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+ 
+      setCartItems((prev) => [...prev, item]);
+      showNotificationMessage(`Added ${quantity} item(s) to cart!`);
+    } catch (err) {
+      console.error("Add to cart error:", err);
+      showNotificationMessage("Failed to add to cart", "error");
+    }
   };
-
-  const response = await axios.post(
-    `${import.meta.env.VITE_backendURL}users/addcart`,
-    item, // data
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      withCredentials: true,
-    } // config
-  );
-
-  setCartItems((prev) => [...prev, item]);
-  showNotificationMessage(`Added ${quantity} item(s) to cart!`);
-};
-
+ 
   // Add to favorites
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -150,6 +165,7 @@ const addToCart = async () => {
       isFavorite ? "info" : "success"
     );
   };
+  
   // Share product
   const shareProduct = async () => {
     if (navigator.share) {
@@ -163,11 +179,11 @@ const addToCart = async () => {
         console.log("Share failed:", err);
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       showNotificationMessage("Link copied to clipboard!");
     }
   };
+  
   // Filter reviews
   const filteredReviews = [...reviews].sort((a, b) => {
     switch (reviewFilter) {
@@ -185,12 +201,20 @@ const addToCart = async () => {
         return new Date(b.date) - new Date(a.date);
     }
   });
+  
   // Submit review
   const submitReview = async () => {
     if (!newReview.message.trim()) {
       showNotificationMessage("Please fill in all fields", "error");
       return;
     }
+ 
+    if (!isLoggedIn) {
+      showNotificationMessage("Please login to write a review", "error");
+      navigate("/login");
+      return;
+    }
+ 
     console.log(userAuth)
     const review = {
       username: userAuth._id,
@@ -199,28 +223,31 @@ const addToCart = async () => {
       message: newReview.message,
       usernamefull: userAuth.fullname
     };
-    const response = await axios.post(
-      `${import.meta.env.VITE_backendURL}reviews/createReview`,
-      review
-    );
-
-    if (response.status === 401) {
-      setNewReview({ rating: 5, message: "", name: "" });
-      setShowReviewModal(false);
-      showNotificationMessage("Please fill in all fields or server", "error");
-    } else {
-      setReviews((prev) => [review, ...prev]);
-      setNewReview({ rating: 5, message: "", name: "" });
-      setShowReviewModal(false);
-      showNotificationMessage("Review submitted successfully!");
+ 
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_backendURL}reviews/createReview`,
+        review
+      );
+ 
+      if (response.status === 201 || response.status === 200) {
+        setReviews((prev) => [review, ...prev]);
+        setNewReview({ rating: 5, message: "", name: "" });
+        setShowReviewModal(false);
+        showNotificationMessage("Review submitted successfully!");
+      }
+    } catch (err) {
+      console.error("Submit review error:", err);
+      showNotificationMessage("Failed to submit review", "error");
     }
   };
-
+ 
   // Calculate average rating
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
       : 0;
+ 
   return (
     <div className="max-w-full text-black mx-auto bg-white relative">
       {/* Notification */}
@@ -254,7 +281,7 @@ const addToCart = async () => {
           <span className="mx-2">{">"}</span>
           <span className="text-black">T-shirts</span>
         </nav>
-
+ 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="flex gap-4">
@@ -275,7 +302,7 @@ const addToCart = async () => {
               </div>
             </div>
           </div>
-
+ 
           {/* Product Info */}
           <div className="space-y-6">
             <div>
@@ -292,7 +319,7 @@ const addToCart = async () => {
                   </button>
                 </div>
               </div>
-
+ 
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex">
                   {[...Array(Math.floor(Product.rating))].map((_, i) => (
@@ -312,7 +339,7 @@ const addToCart = async () => {
                   ({reviews.length} reviews)
                 </span>
               </div>
-
+ 
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-3xl font-bold">
                   ₹{Product.price - (Product.discount / 100) * Product.price}
@@ -324,14 +351,14 @@ const addToCart = async () => {
                   -{Product.discount}%
                 </span>
               </div>
-
+ 
               <p className="text-gray-600 text-start mb-6">
                 This graphic t-shirt which is perfect for any occasion. Crafted
                 from a soft and breathable fabric, it offers superior comfort
                 and style.
               </p>
             </div>
-
+ 
             {/* Color Selection */}
             <div className="text-start">
               <h3 className="font-medium mb-3">Select Colors</h3>
@@ -339,7 +366,6 @@ const addToCart = async () => {
                 <button
                   key={Product.colours}
                   style={{ backgroundColor: Product.colours.toLowerCase() }}
-                  //lower case Product.colours Black => black
                   onClick={() => setSelectedColor(Product.colours)}
                   className={`w-10 h-10 rounded-full border-2 ${selectedColor === Product.colours
                     ? "border-black"
@@ -358,9 +384,10 @@ const addToCart = async () => {
                 Selected: {Product.colours}
               </p>
             </div>
-
+ 
             {/* Quantity and Add to Cart */}
-            {!isLoggedIn? (
+            {/* ✅ FIXED: Changed !isLoggedIn to isLoggedIn */}
+            {isLoggedIn ? (
               <div className="flex gap-4">
                 <div className="flex items-center border rounded-full">
                   <button
@@ -393,18 +420,17 @@ const addToCart = async () => {
                 </button>
               </div>
             ) : (
-              <div className="text-center">
-                <p>Please login to add items to cart </p>
+              <div className="text-center border rounded-lg p-4 bg-gray-50">
+                <p className="mb-3 font-medium">Please login to add items to cart</p>
                 <button
                   onClick={() => navigate("/login")}
-                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors"
                 >
                   Login
                 </button>
               </div>
             )}
-
-
+ 
             {/* Product Features */}
             <div className="border-t pt-6">
               <div className="space-y-3">
@@ -421,7 +447,7 @@ const addToCart = async () => {
             </div>
           </div>
         </div>
-
+ 
         {/* Product Tabs */}
         <div className="mt-16">
           <div className="flex border-b">
@@ -442,7 +468,7 @@ const addToCart = async () => {
               </button>
             ))}
           </div>
-
+ 
           {/* Product Details Tab */}
           {activeTab === "details" && (
             <div className="py-8">
@@ -483,7 +509,7 @@ const addToCart = async () => {
               </div>
             </div>
           )}
-
+ 
           {/* Reviews Section */}
           {activeTab === "reviews" && (
             <div className="py-8">
@@ -509,7 +535,8 @@ const addToCart = async () => {
                     <option value="lowest">Lowest Rated</option>
                     <option value="helpful">Most Helpful</option>
                   </select>
-                  {!isLoggedIn ? (
+                  {/* ✅ FIXED: Changed !isLoggedIn to isLoggedIn */}
+                  {isLoggedIn ? (
                     <button
                       onClick={() => setShowReviewModal(true)}
                       className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
@@ -517,16 +544,13 @@ const addToCart = async () => {
                       Write a Review
                     </button>
                   ) : (
-                    <div className="text-center">
-                      <button
-                        onClick={() => navigate("/login")}
-                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500"
-                      >
-                        Login
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors"
+                    >
+                      Login
+                    </button>
                   )}
-
                 </div>
               </div>
               {filteredReviews.length <= 0 && (
@@ -551,12 +575,12 @@ const addToCart = async () => {
                           />
                         ))}
                       </div>
-
+ 
                       <button>
                         <MoreHorizontal className="w-5 h-5 text-gray-400" />
                       </button>
                     </div>
-
+ 
                     <div className="flex items-center gap-2 mb-3">
                       <h4 className="font-semibold text-black text-start">
                         {review.usernamefull}
@@ -568,11 +592,11 @@ const addToCart = async () => {
                         ></div>
                       )}
                     </div>
-
+ 
                     <p className="text-gray-600 mb-3 text-start">
                       {review.message}
                     </p>
-
+ 
                     <div className="flex justify-between items-center text-sm text-gray-500">
                       <span>Posted on {review.date}</span>
                       <button className="hover:text-gray-700">
@@ -584,7 +608,7 @@ const addToCart = async () => {
               </div>
             </div>
           )}
-
+ 
           {/* FAQs Tab */}
           {activeTab === "faqs" && (
             <div className="py-8">
@@ -615,7 +639,7 @@ const addToCart = async () => {
             </div>
           )}
         </div>
-
+ 
         {/* Review Modal */}
         {showReviewModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -629,7 +653,7 @@ const addToCart = async () => {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-
+ 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -654,7 +678,7 @@ const addToCart = async () => {
                     ))}
                   </div>
                 </div>
-
+ 
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Your Review
@@ -671,7 +695,7 @@ const addToCart = async () => {
                     placeholder="Write your review here..."
                   />
                 </div>
-
+ 
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => setShowReviewModal(false)}
