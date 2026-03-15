@@ -122,12 +122,20 @@ module.exports.verify = async function (req, res) {
   }
 };
  
+// ✅ FIXED: Proper addOrder endpoint for "Add to Cart"
 module.exports.addOrder = async function (req, res, next) {
   const { productId, quantity } = req.body;
   const userId = req.user._id;
   
   try {
-    // Step 1: Validate product
+    // Step 1: Validate input
+    if (!productId || !quantity) {
+      return res.status(400).json({
+        message: "Product ID and quantity are required",
+      });
+    }
+ 
+    // Step 2: Validate product exists
     const isProduct = await productModel.findById(productId);
     if (!isProduct) {
       return res.status(404).json({
@@ -136,86 +144,104 @@ module.exports.addOrder = async function (req, res, next) {
       });
     }
  
-    // Step 2: Validate user
+    // Step 3: Validate user exists
     const isUser = await userModel.findById(userId);
     if (!isUser) {
-      return res.status(404).json({
+      return res.status(401).json({
         header: "Unauthorized access. 🚫",
         message: "Invalid user. Please login again.",
       });
     }
  
-    // Step 3: Check if product already exists in user's orders
+    // Step 4: Check if product already exists in user's orders
     const existingOrder = isUser.orders.find(
       (o) => o.product.toString() === productId
     );
  
     if (existingOrder) {
+      // If already in cart, update quantity instead of pushing again
+      console.log(`📦 Product already in cart, updating quantity from ${existingOrder.quantity} to ${existingOrder.quantity + Number(quantity)}`);
       existingOrder.quantity += Number(quantity);
     } else {
+      // Add new product to cart
+      console.log(`📦 Adding new product to cart with quantity ${quantity}`);
       isUser.orders.push({
         product: isProduct._id,
         quantity: Number(quantity),
       });
     }
  
+    // Step 5: Save user with updated orders
     await isUser.save();
  
-    // Step 4: Populate and respond
+    // Step 6: Populate and respond with updated cart
     const populatedUser = await userModel
       .findById(userId)
       .populate("orders.product")
       .select("-password");
  
-    res.status(201).json({
+    // ✅ FIXED: Return status 200 for success, consistent with getOrder
+    return res.status(200).json({
       header: "Order added successfully 👍🏻",
-      message: "User order list updated successfully!",
+      message: "Item added to cart successfully!",
       orders: populatedUser.orders,
+      cart: populatedUser.orders, // Add both for compatibility
     });
+    
   } catch (err) {
     console.error("Error adding order:", err);
-    res.status(500).json({
-      header: "Something went wrong ",
-      message: err.message,
+    return res.status(500).json({
+      header: "Something went wrong",
+      message: err.message || "Failed to add item to cart",
     });
   }
 };
  
+// ✅ IMPROVED: Better getOrder with more logging
 module.exports.getOrder = async function (req, res, next) {
   const userId = req.user._id;
  
   try {
-    let isUser = await userModel.findOne({ _id: userId }).populate({
+    console.log("📦 Fetching cart for user:", userId);
+ 
+    const isUser = await userModel.findOne({ _id: userId }).populate({
       path: "orders.product",
       model: "product",
     });
  
     if (!isUser) {
+      console.warn("⚠️ User not found:", userId);
       return res.status(401).json({ 
         message: "Unauthorized access." 
       });
     }
  
     if (!isUser.orders || isUser.orders.length === 0) {
+      console.log("📭 Cart is empty for user:", userId);
       return res.status(200).json({
         message: "No cart found 🛒",
         cart: [],
       });
     }
  
-    res.status(200).json({
+    console.log("✅ Cart items found:", isUser.orders.length);
+    
+    // ✅ FIXED: Return status 200 (not 201)
+    return res.status(200).json({
       message: "User cart fetched successfully",
       cart: isUser.orders,
     });
+ 
   } catch (err) {
-    console.log("Get order error:", err);
-    res.status(500).json({
-      header: "User not allow",
+    console.error("❌ Get order error:", err);
+    return res.status(500).json({
       message: "Error fetching cart",
+      error: err.message,
     });
   }
 };
  
+// ✅ IMPROVED: Better deleteOrder with confirmation
 module.exports.deleteOrder = async function (req, res, next) {
   const { productId } = req.body;
   const userId = req.user._id;
@@ -226,6 +252,8 @@ module.exports.deleteOrder = async function (req, res, next) {
         message: "Missing userId or productId in request." 
       });
     }
+ 
+    console.log("🗑️ Removing product:", productId, "for user:", userId);
  
     const isUser = await userModel.findById(userId).populate("orders.product");
     if (!isUser) {
@@ -241,34 +269,43 @@ module.exports.deleteOrder = async function (req, res, next) {
       });
     }
  
+    // Find the index of the order entry matching the given productId
     const orderIndex = isUser.orders.findIndex((o) => {
-      const pid = o.product && o.product._id ? o.product._id.toString() : o.product?.toString();
+      const pid = o.product && o.product._id 
+        ? o.product._id.toString() 
+        : o.product?.toString();
       return pid === productId;
     });
  
     if (orderIndex === -1) {
+      console.warn("⚠️ Product not found in cart:", productId);
       return res.status(404).json({ 
         message: "Product not found in cart." 
       });
     }
  
-    isUser.orders.splice(orderIndex, 1);
+    // Remove the order entry
+    const removedItem = isUser.orders.splice(orderIndex, 1);
+    console.log("✅ Removed item:", removedItem[0].product._id);
+ 
     await isUser.save();
  
+    // Re-populate to ensure product details are present in response
     const populatedUser = await userModel
       .findById(userId)
       .populate("orders.product")
       .select("-password");
  
+    // ✅ FIXED: Return status 200 (not 201)
     return res.status(200).json({
       message: "Product removed from cart successfully",
       cart: populatedUser.orders,
     });
+ 
   } catch (err) {
-    console.error("Delete order error:", err);
+    console.error("❌ Delete order error:", err);
     return res.status(500).json({ 
-      header: "Something went wrong", 
-      message: err.message 
+      message: err.message || "Failed to remove item from cart",
     });
   }
 };
