@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2, Plus, Minus, ArrowRight, Tag } from "lucide-react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
@@ -8,16 +8,16 @@ import { useNavigate } from "react-router-dom";
 export default function ShoppingCartPage() {
   const token = localStorage.getItem('token')
   const navigate = useNavigate();
-  const userAuth = useSelector((state)=> state.userInformation.value)
+  const userAuth = useSelector((state) => state.userInformation.value)
   console.log(userAuth);
 
   const [messageOfCart, setMessageOfCart] = useState("No cart found 🛒");
   const [cartItems, setCartItems] = useState([
     // {
-      //   product: {
-        //     _id: 1,
-        //     name: "Gradient Graphic T-shirt",
-        //     discount: 0,
+    //   product: {
+    //     _id: 1,
+    //     name: "Gradient Graphic T-shirt",
+    //     discount: 0,
     //     color: "White",
     //     price: 145,
     //     image: "/api/placeholder/80/80",
@@ -26,7 +26,7 @@ export default function ShoppingCartPage() {
     // },
   ]);
   const handleCheckout = () => {
-    navigate("/payment", {  state: { total , cartItems } });
+    navigate("/payment", { state: { total, cartItems } });
   };
   const [promoCode, setPromoCode] = useState("");
   const handleShowCartDetial = async (e) => {
@@ -34,20 +34,19 @@ export default function ShoppingCartPage() {
       console.log("user id :-", e);
       // Replace with your API endpoint
       const res = await axios.post(
-        `${import.meta.env.VITE_backendURL}users/getOrder`,
+        `${import.meta.env.VITE_backendURL}users/getOrder`, {},
         {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            withCredentials: true,
-          }
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
       );
       console.log("jdijad", res);
       if (res.status == 201) {
         setCartItems(res.data.cart);
       }
     } catch (err) {
-      console.log(e);
       console.log(err);
       setMessageOfCart(err.response.data.message);
     }
@@ -68,13 +67,16 @@ export default function ShoppingCartPage() {
 
   // Update quantity
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return;
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
+  if (newQuantity < 1) return;
+
+  setCartItems((items) =>
+    items.map((item) =>
+      item.product._id === id
+        ? { ...item, quantity: newQuantity }
+        : item
+    )
+  );
+};
 
   // Remove item
   const removeItem = async (id) => {
@@ -82,13 +84,13 @@ export default function ShoppingCartPage() {
       // If user is logged in, request backend to delete the item from DB
       if (userAuth?._id) {
         const res = await axios.post(
-          `${import.meta.env.VITE_backendURL}users/deleteOrder`,{
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            withCredentials: true,
+          `${import.meta.env.VITE_backendURL}users/deleteOrder`,
+          { productId: id }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          { productId: id }
+          withCredentials: true,
+        }
         );
 
         // If backend returns updated cart, use it. Otherwise fall back to local update.
