@@ -213,7 +213,7 @@ const handleSave = async () => {
           <div className="p-6 text-center border-b">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 relative group">
               <img
-                src={userAuth?.picture || "/default-avatar.png"}
+                src={userAuth?.picture || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
