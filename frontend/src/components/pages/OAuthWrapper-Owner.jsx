@@ -24,7 +24,7 @@ const OAuthWrapper = () => {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true
         }).then(res => {
-                dispatch(setOwnerInfo(res.data.ownerInfo || res.data));
+                dispatch(setOwnerInfo(res.data?.ownerInfo));
                 navigate("/owner-dashboard");
             })
             .catch(() => {

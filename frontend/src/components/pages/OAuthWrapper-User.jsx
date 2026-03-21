@@ -25,7 +25,7 @@ const OAuthWrapper = () => {
             withCredentials: true
         })
         .then(res => {
-            dispatch(setUserInfo(res.data.userInfo || res.data));
+            dispatch(setUserInfo(res.data?.userInfo));
             window.history.replaceState({}, document.title, "/oauth");
             navigate("/shop");
         })
