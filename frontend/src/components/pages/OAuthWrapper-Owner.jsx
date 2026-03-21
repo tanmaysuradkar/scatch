@@ -30,7 +30,7 @@ const OAuthWrapper = () => {
         })
         .catch(() => {
             localStorage.removeItem("token");
-            dispatch(clearOwnerInfo());
+            dispatch(clearownerInfo());
             navigate("/login");
         })
         .finally(() => setIsLoading(false));
