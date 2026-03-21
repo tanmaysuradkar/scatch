@@ -4,6 +4,7 @@ import Header from '../layout/Header'
 import Footer from '../layout/Footer'
 import { useSelector } from 'react-redux'
 import axios from "axios";
+
 export default function UserProfile() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,10 +13,12 @@ export default function UserProfile() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const userAuth = useSelector((state) => state.userInformation.value);
+  const [loading, setLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     fullname: '',
     state: '',
-    picture:'',
+    picture: '',
     address: '',
     pinCode: "",
     addressType: '',
@@ -24,22 +27,24 @@ export default function UserProfile() {
     email: '',
   });
 
-  // this in work it doce's not complete
-useEffect(() => {
-  if (userAuth) {
-    setFormData({
-      fullname: userAuth.fullname || '',
-      email: userAuth.email || '',
-      state: userAuth.state || '',
-      addressType: userAuth.addressType || '',
-      mobileNumber: userAuth.mobileNumber || '',
-      landmark: userAuth.landmark || '',
-      pinCode: userAuth.pinCode || '',
-      address: userAuth.address || '',
-    });
-  }
-}, [userAuth]);
-  
+  // Initialize form data when user auth data is available
+  useEffect(() => {
+    if (userAuth) {
+      setFormData({
+        fullname: userAuth.fullname || '',
+        email: userAuth.email || '',
+        state: userAuth.state || '',
+        // Convert boolean/falsy addressType to appropriate string
+        addressType: userAuth.addressType === 'Work' ? 'Work' : 'Home',
+        mobileNumber: userAuth.mobileNumber || '',
+        landmark: userAuth.Landmark || userAuth.landmark || '', // Handle both cases
+        // Ensure pinCode is not "0" - treat it as empty if it is
+        pinCode: userAuth.pinCode && userAuth.pinCode !== "0" ? userAuth.pinCode : '',
+        address: userAuth.address || '',
+        picture: userAuth.picture || '',
+      });
+    }
+  }, [userAuth]);
 
   const [originalData, setOriginalData] = useState({ ...formData });
 
@@ -104,41 +109,45 @@ useEffect(() => {
     setOriginalData({ ...formData });
   };
 
-  const [loading,setLoading] = useState(false)
-
-const handleSave = async () => {
-  const newErrors = validateForm();
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
-
-  try {
-    setLoading(true)
-
-    const token = localStorage.getItem("token");
-
-    const res = await axios.post(
-      `${import.meta.env.VITE_backendURL}users/userInfomation`,
-      formData,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true
-      }
-    );
-
-    if (res.data.success) {
-      setIsEditing(false);
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
+  const handleSave = async () => {
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false)
-  }
-};
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      // Prepare data to send (use Landmark with capital L to match backend)
+      const dataToSend = {
+        ...formData,
+        Landmark: formData.landmark, // Send as Landmark to backend
+      };
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_backendURL}users/userInfomation`,
+        dataToSend,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true
+        }
+      );
+
+      if (res.data.success) {
+        setIsEditing(false);
+        setShowSuccessMessage(true);
+        setTimeout(() => setShowSuccessMessage(false), 3000);
+      }
+
+    } catch (err) {
+      console.error(err);
+      setErrors({ submit: err.response?.data?.message || 'Failed to update profile' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
     setFormData({ ...originalData });
@@ -184,12 +193,21 @@ const handleSave = async () => {
           Profile updated successfully!
         </div>
       )}
+      
+      {/* Error Message */}
+      {errors.submit && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+          {errors.submit}
+        </div>
+      )}
+      
       {/* Navigation */}
       <div className="h-20 w-full border-gray-200 relative bg-white">
         <div className="h-20 w-full flex items-center justify-center">
           <Header />
         </div>
       </div>
+      
       <div className="min-h-screen bg-gray-50 flex">
         {/* Mobile Menu Button */}
         <button
@@ -219,7 +237,7 @@ const handleSave = async () => {
               />
             </div>
             <div className="bg-black text-white py-2 px-4 rounded-full text-sm font-medium">
-              {userAuth?.fullname}
+              {userAuth?.fullname || 'User'}
             </div>
           </div>
 
@@ -278,18 +296,19 @@ const handleSave = async () => {
                   </button>
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
+                    disabled={loading}
+                    className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center disabled:opacity-50"
                   >
                     <Save size={16} className="mr-1" />
-                    Save
+                    {loading ? 'Saving...' : 'Save'}
                   </button>
                 </div>
               )}
             </div>
 
             <div className="bg-white text-black rounded-lg shadow-sm p-4 lg:p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 justify-center items-center text-center gap-4 lg:gap-6 mb-4 lg:mb-6">
-                {/* full Name And State*/}
+              {/* Full Name and State */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                   <input
@@ -297,7 +316,7 @@ const handleSave = async () => {
                     name="fullname"
                     value={formData.fullname}
                     onChange={handleInputChange}
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                       } ${errors.fullname ? 'border-red-500' : 'border-gray-300'}`}
                     readOnly={!isEditing}
                   />
@@ -310,10 +329,11 @@ const handleSave = async () => {
                       name="state"
                       value={formData.state}
                       onChange={handleInputChange}
-                      className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none ${isEditing ? 'bg-white' : 'bg-gray-50'
+                      className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none ${isEditing ? 'bg-white cursor-pointer' : 'bg-gray-50 cursor-default'
                         } border-gray-300`}
                       disabled={!isEditing}
                     >
+                      <option value="">Select a state</option>
                       {states.map(state => (
                         <option key={state} value={state}>{state}</option>
                       ))}
@@ -324,13 +344,13 @@ const handleSave = async () => {
               </div>
 
               {/* Address */}
-              <div className="mb-4 lg:mb-6">
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
                 <textarea
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none h-20 lg:h-24 ${isEditing ? 'bg-white' : 'bg-gray-50'
+                  className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none h-20 lg:h-24 ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                     } ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
                   readOnly={!isEditing}
                 />
@@ -338,7 +358,7 @@ const handleSave = async () => {
               </div>
 
               {/* Pin Code, Address Type, Landmark */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Pin Code</label>
                   <input
@@ -347,7 +367,7 @@ const handleSave = async () => {
                     value={formData.pinCode}
                     onChange={handleInputChange}
                     maxLength="6"
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                       } ${errors.pinCode ? 'border-red-500' : 'border-gray-300'}`}
                     readOnly={!isEditing}
                   />
@@ -356,27 +376,27 @@ const handleSave = async () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Address Type</label>
-                  <div className="flex items-center space-x-4 mt-3">
-                    <label className="flex items-center">
+                  <div className="flex items-center gap-6 pt-2">
+                    <label className="flex items-center cursor-pointer">
                       <input
                         type="radio"
                         name="addressType"
                         value="Home"
                         checked={formData.addressType === 'Home'}
                         onChange={handleInputChange}
-                        className="mr-2"
+                        className="mr-2 cursor-pointer"
                         disabled={!isEditing}
                       />
                       <span className="text-sm">Home</span>
                     </label>
-                    <label className="flex items-center">
+                    <label className="flex items-center cursor-pointer">
                       <input
                         type="radio"
                         name="addressType"
                         value="Work"
                         checked={formData.addressType === 'Work'}
                         onChange={handleInputChange}
-                        className="mr-2"
+                        className="mr-2 cursor-pointer"
                         disabled={!isEditing}
                       />
                       <span className="text-sm">Work</span>
@@ -384,7 +404,7 @@ const handleSave = async () => {
                   </div>
                 </div>
 
-                <div className="md:col-span-2 xl:col-span-1">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Landmark</label>
                   <input
                     type="text"
@@ -392,7 +412,7 @@ const handleSave = async () => {
                     value={formData.landmark}
                     onChange={handleInputChange}
                     placeholder="Optional"
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                       } border-gray-300`}
                     readOnly={!isEditing}
                   />
@@ -400,9 +420,9 @@ const handleSave = async () => {
               </div>
 
               {/* Contact Information */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 lg:mb-6">Contact Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h3>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
                   <input
@@ -411,7 +431,7 @@ const handleSave = async () => {
                     value={formData.mobileNumber}
                     onChange={handleInputChange}
                     placeholder="+91 xxxxx xxxxx"
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                       } ${errors.mobileNumber ? 'border-red-500' : 'border-gray-300'}`}
                     readOnly={!isEditing}
                   />
@@ -425,15 +445,13 @@ const handleSave = async () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white' : 'bg-gray-50'
+                    className={`w-full px-3 lg:px-4 py-2 lg:py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${isEditing ? 'bg-white cursor-text' : 'bg-gray-50 cursor-default'
                       } ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                     readOnly={!isEditing}
                   />
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
               </div>
-
-
 
               {/* Edit Button */}
               <div className="flex justify-center">
@@ -455,10 +473,11 @@ const handleSave = async () => {
                     </button>
                     <button
                       onClick={handleSave}
-                      className="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition-colors font-medium text-sm flex items-center"
+                      disabled={loading}
+                      className="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 transition-colors font-medium text-sm flex items-center disabled:opacity-50"
                     >
                       <Save size={16} className="mr-2" />
-                      Save Changes
+                      {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                   </div>
                 )}
