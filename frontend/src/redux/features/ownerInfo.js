@@ -10,13 +10,14 @@ export const ownerInfo = createSlice({
     },
   },
   reducers: {
-    setownerInfo: (state, actions) => {
-      state.value = actions.payload;
+    setOwnerInfo: (state, action) => {  
+      state.value = action.payload;   
     },
-    clearownerInfo: (state) => {
-      state.value = { email: " ", fullname: " ", _id: " "};
+    clearOwnerInfo: (state) => {         
+      state.value = { email: "", fullname: "", _id: "" }; 
     },
   },
 });
+
 export const { setOwnerInfo, clearOwnerInfo } = ownerInfo.actions;
 export default ownerInfo.reducer;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from 'react-redux';
-import { setOwnerInfo,clearOwnerInfo } from '../../redux/features/ownerInfo';
+import { setOwnerInfo, clearOwnerInfo } from '../../redux/features/ownerInfo';
 
 const OAuthWrapper = () => {
     const dispatch = useDispatch();
@@ -18,22 +18,21 @@ const OAuthWrapper = () => {
             return;
         }
 
-        localStorage.setItem("token", token);
+        localStorage.setItem("ownerToken", token);
 
         axios.get(`${import.meta.env.VITE_backendURL}auth/owner`, {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true
-        })
-        .then(res => {
-            dispatch(setOwnerInfo(res.data.ownerInfo || res.data));
-            navigate("/owner-dashboard");
-        })
-        .catch(() => {
-            localStorage.removeItem("token");
-            dispatch(clearownerInfo());
-            navigate("/login");
-        })
-        .finally(() => setIsLoading(false));
+        }).then(res => {
+                dispatch(setOwnerInfo(res.data.ownerInfo || res.data));
+                navigate("/owner-dashboard");
+            })
+            .catch(() => {
+                localStorage.removeItem("ownerToken");
+                dispatch(clearOwnerInfo());  
+                navigate("/login");
+            })
+            .finally(() => setIsLoading(false));
 
         // Remove token from URL
         window.history.replaceState({}, document.title, "/oauth");

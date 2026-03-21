@@ -8,7 +8,7 @@ const OwnerProtectWrapper = ({
 }) => {
     const OwnerAuth = useSelector((state)=> state.ownerInformation.value)
     const dispatch = useDispatch()
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('ownerToken')
     const navigate = useNavigate()
     const [ isLoading, setIsLoading ] = useState(true)
     const setOwner = setOwnerInfo;
