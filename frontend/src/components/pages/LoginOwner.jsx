@@ -60,7 +60,7 @@ export default function LoginOwner() {
       );
       if (response.status === 201) {
         const data = response.data;
-        localStorage.setItem('token', data.token)
+        localStorage.setItem('ownerToken', data.token)
         Navigate("/my-account")
       }
       if (error.status === 401) {
