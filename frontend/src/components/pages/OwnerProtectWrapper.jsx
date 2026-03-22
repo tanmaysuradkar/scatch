@@ -32,7 +32,7 @@ const OwnerProtectWrapper = ({
         }).catch(err => {
                 console.log(err)
                 localStorage.removeItem('ownerToken')
-                navigate('/login')
+                navigate('/login-owner')
             })
     }, [ token ])
 

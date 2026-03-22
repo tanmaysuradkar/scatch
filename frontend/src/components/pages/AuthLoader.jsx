@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setUserInfo, clearUserInfo } from "../../redux/features/userInfo";
+import { setOwnerInfo,clearOwnerInfo } from "../../redux/features/ownerInfo";
 
 const AuthLoader = ({ children }) => {
   const dispatch = useDispatch();
@@ -54,12 +55,12 @@ const AuthLoader = ({ children }) => {
           }
         )
         .then((res) => {
-          dispatch(setUserInfo({ ...res.data, userType: "owner" }));
+          dispatch(setOwnerInfo({ ...res.data, userType: "owner" }));
         })
         .catch((error) => {
           console.error("Owner auth error:", error);
           localStorage.removeItem("ownerToken");
-          dispatch(clearUserInfo());
+          dispatch(clearOwnerInfo());
         });
     }
   }, [dispatch]);
