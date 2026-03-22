@@ -11,11 +11,11 @@ export const ownerInfo = createSlice({
   },
   reducers: {
     setOwnerInfo: (state, action) => {
-      console.log("Redux: Setting user info", actions.payload); // Debug log
+      console.log("Redux: Setting Owner info", actions.payload); // Debug log
       state.value = action.payload;
     },
     clearOwnerInfo: (state) => {
-      console.log("Redux: Clearing user info"); // Debug log
+      console.log("Redux: Clearing Owner info"); // Debug log
       state.value = { email: "", fullname: "", _id: "" };
     },
   },

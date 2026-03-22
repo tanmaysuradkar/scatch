@@ -55,10 +55,10 @@ const AuthLoader = ({ children }) => {
           }
         )
         .then((res) => {
-          dispatch(setOwnerInfo({ ...res.data, userType: "owner" }));
+          dispatch(setOwnerInfo(res.data?.Owner));
         })
         .catch((error) => {
-          console.error("Owner auth error:", error);
+          console.log("Owner auth error:", error);
           localStorage.removeItem("ownerToken");
           dispatch(clearOwnerInfo());
         });
