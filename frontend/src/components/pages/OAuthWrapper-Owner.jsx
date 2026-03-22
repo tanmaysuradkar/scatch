@@ -25,7 +25,6 @@ const OAuthWrapper = () => {
         `${import.meta.env.VITE_backendURL}auth/owner`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
         },
       )
       .then((res) => {

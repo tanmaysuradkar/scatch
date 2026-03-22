@@ -18,7 +18,7 @@ const OwnerProtectWrapper = ({
             navigate('/login-owner')
         }
         console.log(token,"token of Account")
-        axios.get(`${import.meta.env.VITE_backendURL}owner/profile`,{}, {
+        axios.get(`${import.meta.env.VITE_backendURL}owners/profile`,{
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -31,7 +31,7 @@ const OwnerProtectWrapper = ({
             }
         }).catch(err => {
                 console.log(err)
-                localStorage.removeItem('token')
+                localStorage.removeItem('ownerToken')
                 navigate('/login')
             })
     }, [ token ])
