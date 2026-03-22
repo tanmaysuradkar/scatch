@@ -1,46 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch } from 'react-redux';
-import { setOwnerInfo, clearOwnerInfo } from '../../redux/features/ownerInfo';
+import { useDispatch } from "react-redux";
+import { setOwnerInfo, clearOwnerInfo } from "../../redux/features/ownerInfo";
 
 const OAuthWrapper = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get("token");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
-        if (!token) {
-            navigate("/login");
-            return;
-        }
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-        localStorage.setItem("ownerToken", token);
+    localStorage.setItem("ownerToken", token);
 
-        axios.get(`${import.meta.env.VITE_backendURL}auth/owner`, {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true
-        }).then(res => {
-                dispatch(setOwnerInfo(res.data?.ownerInfo));
-                navigate("/owner-dashboard");
-            })
-            .catch(() => {
-                localStorage.removeItem("ownerToken");
-                dispatch(clearOwnerInfo());  
-                navigate("/login");
-            })
-            .finally(() => setIsLoading(false));
+    axios
+      .get(
+        `${import.meta.env.VITE_backendURL}auth/owner`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        },
+      )
+      .then((res) => {
+        console.log("Owner Info OAuth :- ",res.data);
+        dispatch(setOwnerInfo(res.data?.ownerInfo));
+        navigate("/owner-dashboard");
+      })
+      .catch(() => {
+        localStorage.removeItem("ownerToken");
+        dispatch(clearOwnerInfo());
+        navigate("/login");
+      })
+      .finally(() => setIsLoading(false));
 
-        // Remove token from URL
-        window.history.replaceState({}, document.title, "/oauth");
-    }, []);
+    // Remove token from URL
+    window.history.replaceState({}, document.title, "/oauth");
+  }, []);
 
-    if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
 
-    return <div>Redirecting...</div>;
+  return <div>Redirecting...</div>;
 };
 
 export default OAuthWrapper;
