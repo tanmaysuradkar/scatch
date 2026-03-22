@@ -8,7 +8,7 @@ const OwnerProtectWrapper = ({
 }) => {
     const OwnerAuth = useSelector((state)=> state.ownerInformation.value)
     const dispatch = useDispatch()
-    const token = localStorage.getItem('ownerToken')
+    const token = localStorage.getItem('ownerToken');
     const navigate = useNavigate()
     const [ isLoading, setIsLoading ] = useState(true)
     const setOwner = setOwnerInfo;
@@ -18,7 +18,7 @@ const OwnerProtectWrapper = ({
             navigate('/login-owner')
         }
         console.log(token,"token of Account")
-        axios.post(`${import.meta.env.VITE_backendURL}owner/profile`,{}, {
+        axios.get(`${import.meta.env.VITE_backendURL}owner/profile`,{}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
