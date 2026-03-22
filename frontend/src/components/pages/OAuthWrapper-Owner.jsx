@@ -23,7 +23,6 @@ const OAuthWrapper = () => {
     axios
       .get(
         `${import.meta.env.VITE_backendURL}auth/owner`,
-        {},
         {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,

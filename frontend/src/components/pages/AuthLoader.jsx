@@ -32,7 +32,7 @@ const AuthLoader = ({ children }) => {
           }
         )
         .then((res) => {
-          dispatch(setUserInfo({ ...res.data, userType: "user" }));
+          dispatch(setUserInfo(res.data?.userInfo));
         })
         .catch((error) => {
           console.error("User auth error:", error);
