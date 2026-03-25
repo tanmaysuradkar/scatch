@@ -27,8 +27,8 @@ export default function OwenerProfile() {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
 
   const [ownerProfile, setOwnerProfile] = useState({
-    fullName: "Owner Name",
-    email: "owner@email.com",
+    fullName: "Tanmay Suradkar",
+    email: "tanmaysuradkar2008@email.com",
   });
 
   const handleAccountChange = (e) => {
@@ -211,7 +211,7 @@ export default function OwenerProfile() {
                           <tr key={`${t.paymentId}-${t.product?._id || idx}`} className="border-b hover:bg-gray-50">
                             <td className="py-4 px-2 flex items-center gap-3">
                               <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                <img src={t.product?.image ? `../${t.product.image}` : "/api/placeholder/80/80"} alt={t.product?.name} className="w-full h-full object-cover" />
+                                <img src={t.product?.image ? `${t.product.image}` : "/api/placeholder/80/80"} alt={t.product?.name} className="w-full h-full object-cover" />
                               </div>
                               <div>
                                 <div className="font-semibold">{t.product?.name || "-"}</div>
@@ -281,7 +281,7 @@ export default function OwenerProfile() {
                         {products.map((p, idx) => (
                           <tr key={p._id || idx} className="border-b hover:bg-gray-50">
                             <td className="py-4 px-2 w-24">
-                              <img src={p.image ? `../${p.image}` : "/api/placeholder/80/80"} alt={p.name} className="w-20 h-20 object-cover rounded" />
+                              <img src={p.image ? `${p.image}` : "/api/placeholder/80/80"} alt={p.name} className="w-20 h-20 object-cover rounded" />
                             </td>
                             <td className="py-4 px-2">
                               {editIndex === idx ? (
