@@ -7,12 +7,12 @@ if (!MONGODB_URI) {
 }
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect("mongodb://127.0.0.1:27017/scatch")
   .then(() => {
     dbgr("MongoDB connected:", mongoose.connection.name);
   })
   .catch((err) => {
-    console.error("MongoDB connection error:", err);
+    console.error("MongoDB connection error:", MONGODB_URI);
   });
 
 module.exports = mongoose.connection;

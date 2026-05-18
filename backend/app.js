@@ -7,7 +7,6 @@ const flash = require("connect-flash");
 const cors = require("cors")
 require("dotenv").config();
 const passport = require("passport")
-
 const ownersRouter = require("./routes/owners.route");
 const productsRouter = require("./routes/products.route");
 const usersRouter = require("./routes/users.route");
@@ -31,10 +30,8 @@ app.use(
   })
 );
 
-
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(cors({
   origin: `https://scatch-b7il.onrender.com`, // my frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
